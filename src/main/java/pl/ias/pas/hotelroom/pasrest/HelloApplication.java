@@ -1,4 +1,4 @@
-package pl.ias.pas.aquarium.pasrest;
+package pl.ias.pas.hotelroom.pasrest;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;

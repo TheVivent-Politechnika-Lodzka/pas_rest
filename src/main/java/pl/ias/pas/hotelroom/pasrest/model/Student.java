@@ -1,6 +1,5 @@
-package pl.ias.pas.aquarium.pasrest.model;
+package pl.ias.pas.hotelroom.pasrest.model;
 
-import jakarta.json.bind.annotation.JsonbCreator;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class Student {

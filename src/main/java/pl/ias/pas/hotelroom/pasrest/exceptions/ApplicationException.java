@@ -1,4 +1,4 @@
-package pl.ias.pas.aquarium.pasrest.exceptions;
+package pl.ias.pas.hotelroom.pasrest.exceptions;
 
 public class ApplicationException extends Exception{
 }

@@ -1,12 +1,12 @@
-package pl.ias.pas.aquarium.pasrest.endpoints;
+package pl.ias.pas.hotelroom.pasrest.endpoints;
 
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import pl.ias.pas.aquarium.pasrest.exceptions.InvalidIDException;
-import pl.ias.pas.aquarium.pasrest.managers.StudentManager;
-import pl.ias.pas.aquarium.pasrest.model.Student;
+import pl.ias.pas.hotelroom.pasrest.exceptions.InvalidIDException;
+import pl.ias.pas.hotelroom.pasrest.managers.StudentManager;
+import pl.ias.pas.hotelroom.pasrest.model.Student;
 
 import java.net.URI;
 import java.util.ArrayList;

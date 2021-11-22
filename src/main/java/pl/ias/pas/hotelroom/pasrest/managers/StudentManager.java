@@ -1,8 +1,8 @@
-package pl.ias.pas.aquarium.pasrest.managers;
+package pl.ias.pas.hotelroom.pasrest.managers;
 
 import jakarta.enterprise.context.RequestScoped;
-import pl.ias.pas.aquarium.pasrest.exceptions.InvalidIDException;
-import pl.ias.pas.aquarium.pasrest.model.Student;
+import pl.ias.pas.hotelroom.pasrest.exceptions.InvalidIDException;
+import pl.ias.pas.hotelroom.pasrest.model.Student;
 
 @RequestScoped
 public class StudentManager {
