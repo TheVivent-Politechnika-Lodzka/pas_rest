@@ -1,5 +1,6 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class User {
@@ -13,9 +14,11 @@ public class User {
     private UserType userType;
 
     public User() {
+        this.isActive = true;
     }
 
-    // nadawanie id to odpowiedzialność managera
+    // nadawanie id to odpowiedzialność repozytorium
+    // typ użytkownika to nadaje się potem (kto przy rejestracji od razu wybiera typ użytkownika? xD)
     public User(UUID id, String login, String password, String name, String surname) {
         this.id = id;
         this.login = login;
@@ -23,6 +26,33 @@ public class User {
         this.name = name;
         this.surname = surname;
         this.userType = UserType.CLIENT;
+        this.isActive = true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(login, user.login);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, login);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", login='" + login + '\'' +
+                ", password='" + password + '\'' +
+                ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", isActive=" + isActive +
+                ", userType=" + userType +
+                '}';
     }
 
     public UUID getId() {

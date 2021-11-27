@@ -9,7 +9,7 @@ aby móc uruchomić projekt, należy dodać konfigurację startową. W tym celu:
 1. klikamy na `add configuration` w prawym górnym rogu przy przycisku budowania
 2. dodajemy konfigurację `Payara Server` -> `Local`
 3. upewniamy się, że wybrana wersja Javy to 11. Intellij pozwala na pobranie dowolnej wersji dla danej konfiguracji.
-4. Może krzyczyć o brak `war` czy coś takiego, ale nas to nie interesuje
+4. W zakładce `Deployment` klikamy plusik i dodajemy `artifact` -> `war` (`war exploded` też powinno działać)
 
 ## Zapamiętać
 
@@ -23,3 +23,8 @@ składa się z 3 klas:
 - `User` - reprezentuje użytkownika (użytkownik)
 - `HotelRoom` - reprezentuje pokój hotelowy (zasób)
 - `Reservation` - reprezentuje rezerwację (alokacja)
+
+## Zapytania
+
+zapytania kierujemy pod adres: `http://localhost:8080/<context>/api/`, gdzie `<context>` to nazwa kontekstu (
+domyślnie `PASrest-1.0-SNAPSHOT`)
