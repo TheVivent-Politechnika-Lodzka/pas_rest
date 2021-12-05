@@ -49,17 +49,17 @@ public class UserManager {
     }
 
     public void removeUser(UUID id) throws ApplicationDaoException, PermissionsException {
-        if (accesLevel != UserType.USER_ADMIN) {
-            throw new PermissionsException("403", "You don't have permission to remove user");
-        }
+//        if (accesLevel != UserType.USER_ADMIN) {
+//            throw new PermissionsException("403", "You don't have permission to remove user");
+//        }
         User user = userDao.getUserById(id);
         userDao.removeUser(user);
     }
 
-    void updateUser(User user) throws ApplicationDaoException, PermissionsException {
-        if (accesLevel != UserType.USER_ADMIN) {
-            throw new PermissionsException("403", "You don't have permission to update user");
-        }
+    public void updateUser(User user) throws ApplicationDaoException, PermissionsException {
+//        if (accesLevel != UserType.USER_ADMIN) {
+//            throw new PermissionsException("403", "You don't have permission to update user");
+//        }
         userDao.updateUser(user);
     }
 

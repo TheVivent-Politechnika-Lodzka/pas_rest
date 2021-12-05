@@ -30,12 +30,18 @@ public class HotelRoom {
         return roomNumber;
     }
 
+    public void setRoomNumber(int roomNumber) {
+        this.roomNumber = roomNumber;
+    }
+
     public int getPrice() {
         return price;
     }
 
     public void setPrice(int price) {
-        // TODO czy > 0 ?
+        if(price <= 0) {
+            throw new RuntimeException();
+        }
         this.price = price;
     }
 
@@ -44,7 +50,9 @@ public class HotelRoom {
     }
 
     public void setCapacity(int capacity) {
-        // TODO czy > 0 ?
+        if(capacity <= 0) {
+            throw new RuntimeException();
+        }
         this.capacity = capacity;
     }
 

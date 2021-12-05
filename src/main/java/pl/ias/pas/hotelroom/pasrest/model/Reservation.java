@@ -46,7 +46,9 @@ public class Reservation {
     }
 
     public void setEndDate(Date endDate) {
-        // TODO walidacja czy endDate jest po startDate
+        if(this.startDate.after(endDate)) {
+            throw new RuntimeException();
+        }
         this.endDate = endDate;
     }
 

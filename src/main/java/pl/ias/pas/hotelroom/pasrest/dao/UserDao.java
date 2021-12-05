@@ -91,4 +91,7 @@ public class UserDao {
         return result;
     }
 
+    public List<User> getAllUsers() {
+        return usersRepository;
+    }
 }
