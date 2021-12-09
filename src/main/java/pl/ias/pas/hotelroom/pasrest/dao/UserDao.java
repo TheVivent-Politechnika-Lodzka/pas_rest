@@ -4,17 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
+import java.util.*;
 
 @ApplicationScoped
 public class UserDao {
 
-    private ArrayList<User> usersRepository = new ArrayList<>();
+    private List<User> usersRepository = Collections.synchronizedList(new ArrayList<User>());
 
-    synchronized public UUID addUser(User user) throws ApplicationDaoException {
+    public UUID addUser(User user) throws ApplicationDaoException {
         // sprawdzanie nie pustości loginu
         if ("".equals(user.getLogin())) {
             throw new ApplicationDaoException("500", "Login cannot be empty");
@@ -49,7 +46,7 @@ public class UserDao {
         oldUser.setSurname(user.getSurname());
     }
 
-    synchronized public void removeUser(User user) throws ApplicationDaoException {
+    public void removeUser(User user) throws ApplicationDaoException {
         if (!usersRepository.contains(user)) {
             throw new ApplicationDaoException("500", "User does not exist");
         }
@@ -61,7 +58,7 @@ public class UserDao {
         }
     }
 
-    synchronized public User getUserById(UUID id) throws ApplicationDaoException {
+    public User getUserById(UUID id) throws ApplicationDaoException {
         for (User user : usersRepository) {
             if (user.getId().equals(id)) {
                 return user;
@@ -70,7 +67,7 @@ public class UserDao {
         throw new ApplicationDaoException("500", "User does not exist");
     }
 
-    synchronized public User getUserByLogin(String login) throws ApplicationDaoException {
+    public User getUserByLogin(String login) throws ApplicationDaoException {
         for (User user : usersRepository) {
             if (user.getLogin().equals(login)) {
                 return user;
@@ -79,7 +76,7 @@ public class UserDao {
         throw new ApplicationDaoException("500", "User does not exist");
     }
 
-    synchronized public List<User> searchUsers(String login) {
+    public List<User> searchUsers(String login) {
         ArrayList<User> result = new ArrayList<>();
         String searchLogin = login.toLowerCase(Locale.ROOT);
         for (User user : usersRepository) {

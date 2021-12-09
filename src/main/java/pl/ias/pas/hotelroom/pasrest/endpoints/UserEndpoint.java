@@ -57,7 +57,7 @@ public class UserEndpoint {
     }
 
     @GET
-    @Path("/all")
+    @Path("/search")
     @Produces("application/json")
     public List<User> getUsers(@QueryParam("logins") String logins) {
         try {
@@ -70,6 +70,7 @@ public class UserEndpoint {
     }
 
     @GET
+    @Path("/login")
     @Produces("application/json")
     public User getUser(@QueryParam("login") String login) {
         try {

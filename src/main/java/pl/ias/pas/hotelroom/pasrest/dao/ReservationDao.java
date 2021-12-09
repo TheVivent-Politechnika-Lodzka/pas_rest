@@ -6,15 +6,16 @@ import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
 public class ReservationDao {
 
-    private ArrayList<Reservation> reservationsRepository = new ArrayList<>();
+    private List<Reservation> reservationsRepository = Collections.synchronizedList(new ArrayList<Reservation>());
 
-    synchronized public UUID addReservation(Reservation reserv) throws ApplicationDaoException {
+    public UUID addReservation(Reservation reserv) throws ApplicationDaoException {
         UUID id = UUID.randomUUID();
         Reservation newReservation;
 

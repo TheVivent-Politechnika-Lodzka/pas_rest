@@ -17,7 +17,9 @@ public class ReservationManager {
 
     @Inject
     private UserDao userDao;
+    @Inject
     private ReservationDao reservDao;
+    @Inject
     private HotelRoomDao roomDao;
 
     public UUID addReservation(Reservation reservation) throws ApplicationDaoException {

@@ -5,18 +5,20 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
+import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
 public class HotelRoomDao {
 
-    private ArrayList<HotelRoom> roomsRepository = new ArrayList<>();
+    private List<HotelRoom> roomsRepository = Collections.synchronizedList(new ArrayList<HotelRoom>());
 
-    synchronized public UUID addHotelRoom(HotelRoom room) throws ApplicationDaoException {
+    public UUID addHotelRoom(HotelRoom room) throws ApplicationDaoException {
 
         UUID id = UUID.randomUUID();
 
@@ -49,7 +51,7 @@ public class HotelRoomDao {
         oldRoom.setDescription(room.getDescription());
     }
 
-    synchronized public void removeRoom(HotelRoom room) throws ApplicationDaoException {
+    public void removeRoom(HotelRoom room) throws ApplicationDaoException {
         if (!roomsRepository.contains(room)) {
             throw new ApplicationDaoException("500", "Room couldn't exist");
         }
@@ -61,7 +63,7 @@ public class HotelRoomDao {
         }
     }
 
-    synchronized public HotelRoom getRoomById(UUID id) throws ApplicationDaoException {
+    public HotelRoom getRoomById(UUID id) throws ApplicationDaoException {
         for (HotelRoom room : roomsRepository) {
             if (room.getId().equals(id)) {
                 return room;
@@ -70,7 +72,7 @@ public class HotelRoomDao {
         throw new ApplicationDaoException("500", "Room doesn't exist");
     }
 
-    synchronized public HotelRoom getRoomByNumber(int number) throws ApplicationDaoException {
+    public HotelRoom getRoomByNumber(int number) throws ApplicationDaoException {
         for (HotelRoom room : roomsRepository) {
             if (room.getRoomNumber() == number) {
                 return room;
