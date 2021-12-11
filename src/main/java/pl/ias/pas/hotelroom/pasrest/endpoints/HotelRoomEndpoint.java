@@ -6,35 +6,67 @@ import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
-import pl.ias.pas.hotelroom.pasrest.managers.RoomManager;
+import pl.ias.pas.hotelroom.pasrest.managers.HotelRoomManager;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 
 @RequestScoped
 @Path("/room")
-public class RoomEndpoint {
+public class HotelRoomEndpoint {
 
     @Inject
-    private RoomManager roomManager;
+    private HotelRoomManager roomManager;
 
-    @PUT
+    // przykładowe zapytanie tworzące nowego użytkownika
+    // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/room roomNumber=2 price=100 capacity=300 description=cosy
+
+    //CREATE\\
+    @POST
     @Consumes("application/json")
     public Response createRoom(HotelRoom room) {
         UUID createdRoom = null;
         try {
             createdRoom = roomManager.addRoom(room);
-        } catch (ApplicationDaoException e) {
+        } catch (ApplicationDaoException | PermissionsException e) {
             // TODO poprawna obsługa błędów
-            e.printStackTrace();
-        } catch (PermissionsException e) {
             e.printStackTrace();
         }
         return Response.created(URI.create("/room/" + createdRoom)).build();
     }
 
+    //UPDATE\\
+    @PUT
+    @Path("/{id}")
+    @Consumes("application/json")
+    public HotelRoom updateRoom(@PathParam("id") String id, HotelRoom room) {
+        try {
+            roomManager.updateRoom(roomManager.getRoomById(UUID.fromString(id)), room);
+            return room;
+        } catch (ApplicationDaoException | PermissionsException e) {
+            // TODO poprawna obsługa błędów
+            e.printStackTrace();
+        }
+        return room;
+    }
+
+    //DELETE\\
+    @DELETE
+    @Path("/{id}")
+    @Consumes("application/json")
+    public void removeRoom(@PathParam("id") String id) {
+        try {
+            roomManager.removeRoom(UUID.fromString(id));
+        } catch (ApplicationDaoException e) {
+            // TODO poprawna obsługa błędów
+            e.printStackTrace();
+        }
+    }
+
+    //READ\\
     @GET
     @Path("/{id}")
     @Produces("application/json")
@@ -49,8 +81,9 @@ public class RoomEndpoint {
     }
 
     @GET
+    @Path("/number")
     @Produces("application/json")
-    public HotelRoom getRoom(@QueryParam("number") int number) {
+    public HotelRoom getRoomByNumber(@QueryParam("number") int number) {
         try {
             return roomManager.getRoomByNumber(number);
         } catch (ApplicationDaoException e) {
@@ -58,5 +91,12 @@ public class RoomEndpoint {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @GET
+    @Path("/all")
+    @Produces("application/json")
+    public List<HotelRoom> getAllRooms() {
+        return roomManager.giveAllRooms();
     }
 }

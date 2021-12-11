@@ -18,37 +18,22 @@ public class HotelRoomDao {
 
     private List<HotelRoom> roomsRepository = Collections.synchronizedList(new ArrayList<HotelRoom>());
 
-    public UUID addHotelRoom(HotelRoom room) throws ApplicationDaoException {
-
-        UUID id = UUID.randomUUID();
-
-        // sprawdzanie unikalności numeru
-        for (HotelRoom currentHotelRoom : roomsRepository) {
-            if (currentHotelRoom.getRoomNumber() == room.getRoomNumber()) {
-                throw new ApplicationDaoException("500", "Room already exists");
-            }
-        }
-
-        // sprawdzanie nieujemnej ceny i pojemności
-//        if (room.getCapacity() < 0 || room.getPrice() < 0) {
-//            throw new ApplicationDaoException("500", "Room can't exist");
-//        }
-
-        // wstawienie nowego pokoju
-        HotelRoom newRoom = new HotelRoom(id, room.getRoomNumber(), room.getPrice(), room.getCapacity(), room.getDescription());
-        roomsRepository.add(newRoom);
-        return id;
+    public UUID addHotelRoom(HotelRoom room) {
+        roomsRepository.add(room);
+        return room.getId();
     }
 
-    public void updateHotelRoom(HotelRoom room) throws ApplicationDaoException {
-        if (!roomsRepository.contains(room)) {
+    public void updateHotelRoom(HotelRoom oldRoom, HotelRoom room) throws ApplicationDaoException {
+        if (!roomsRepository.contains(oldRoom)) {
             throw new ApplicationDaoException("500", "Room doesn't exist");
         }
 
-        HotelRoom oldRoom = getRoomById(room.getId());
+        oldRoom.setRoomNumber(room.getRoomNumber());
         oldRoom.setPrice(room.getPrice());
         oldRoom.setCapacity(room.getCapacity());
-        oldRoom.setDescription(room.getDescription());
+        if(room.getDescription() != null) {
+            oldRoom.setDescription(room.getDescription());
+        }
     }
 
     public void removeRoom(HotelRoom room) throws ApplicationDaoException {

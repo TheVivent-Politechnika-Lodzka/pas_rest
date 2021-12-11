@@ -9,6 +9,7 @@ public class HotelRoom {
     private int price;
     private int capacity;
     private String description;
+    private boolean allocation;
 
     public HotelRoom() {
     }
@@ -20,6 +21,15 @@ public class HotelRoom {
         this.price = price;
         this.capacity = capacity;
         this.description = description;
+        allocation = false;
+    }
+
+    public boolean isAllocated() {
+        return allocation;
+    }
+
+    public void setAllocation(boolean allocation) {
+        this.allocation = allocation;
     }
 
     public UUID getId() {

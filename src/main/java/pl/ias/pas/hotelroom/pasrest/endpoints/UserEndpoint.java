@@ -25,24 +25,49 @@ public class UserEndpoint {
     private UserManager userManager;
 
     // przykładowe zapytanie tworzące nowego użytkownika
-    // http PUT localhost:8080/PASrest-1.0-SNAPSHOT/api/user login=test password=test name=test surname=test
-    @PUT
+    // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/user login=test password=test name=test surname=test
+
+    //CREATE\\
+    @POST
     @Consumes("application/json")
     public Response createUser(User user) {
         UUID createdUser = null;
         try {
             createdUser = userManager.addUser(user);
-        } catch (ApplicationDaoException e) {
+        } catch (ApplicationDaoException | PermissionsException e) {
             // TODO poprawna obsługa błędów
-            e.printStackTrace();
-        } catch (PermissionsException e) {
             e.printStackTrace();
         }
         return Response.created(URI.create("/user/" + createdUser)).build();
     }
 
-    // TODO Update
+    //UPDATE\\
+    @PUT
+    @Path("/{id}")
+    @Consumes("application/json")
+    public void updateUser(@PathParam("id") String id, User user) {
+        try {
+            userManager.updateUser(userManager.getUserById(UUID.fromString(id)), user);
+        } catch (ApplicationDaoException | PermissionsException e) {
+            // TODO poprawna obsługa błędów
+            e.printStackTrace();
+        }
+    }
 
+    //DELETE\\
+    @DELETE
+    @Path("/{id}")
+    @Consumes("application/json")
+    public void archiveUser(@PathParam("id") String id) {
+        try {
+            userManager.removeUser(UUID.fromString(id));
+        } catch (ApplicationDaoException | PermissionsException e) {
+            // TODO poprawna obsługa błędów
+            e.printStackTrace();
+        }
+    }
+
+    //READ\\
     @GET
     @Path("/{id}")
     @Produces("application/json")
@@ -59,9 +84,9 @@ public class UserEndpoint {
     @GET
     @Path("/search")
     @Produces("application/json")
-    public List<User> getUsers(@QueryParam("logins") String logins) {
+    public List<User> getUsersContainsLogin(@QueryParam("login") String login) {
         try {
-            return userManager.searchUsers(logins);
+            return userManager.searchUsers(login);
         } catch (ApplicationDaoException e) {
             // TODO poprawna obsługa błędów
             e.printStackTrace();
@@ -72,7 +97,7 @@ public class UserEndpoint {
     @GET
     @Path("/login")
     @Produces("application/json")
-    public User getUser(@QueryParam("login") String login) {
+    public User getUserByLogin(@QueryParam("login") String login) {
         try {
             return userManager.getUserByLogin(login);
         } catch (ApplicationDaoException e) {
@@ -80,5 +105,20 @@ public class UserEndpoint {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @GET
+    @Path("/all")
+    @Produces("application/json")
+    public List<User> getAllUsers() {
+        return userManager.giveAllUsers();
+    }
+
+    //ARCHIVE\\
+    @GET
+    @Path("/archive")
+    @Produces("application/json")
+    public List<User> getAllArchiveUsers() {
+        return userManager.giveArchiveUsers();
     }
 }

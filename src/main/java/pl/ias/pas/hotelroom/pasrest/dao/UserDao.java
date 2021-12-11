@@ -10,40 +10,29 @@ import java.util.*;
 public class UserDao {
 
     private List<User> usersRepository = Collections.synchronizedList(new ArrayList<User>());
+    private List<User> archiveRepository = Collections.synchronizedList(new ArrayList<User>());
 
-    public UUID addUser(User user) throws ApplicationDaoException {
-        // sprawdzanie nie pustości loginu
-        if ("".equals(user.getLogin())) {
-            throw new ApplicationDaoException("500", "Login cannot be empty");
-        }
-
-        // sprawdzanie unikalności loginu i id
-        UUID id = UUID.randomUUID();
-        for (User currentUser : usersRepository) {
-            if (currentUser.getLogin().equals(user.getLogin())) {
-                throw new ApplicationDaoException("500", "User already exists");
-            }
-            if (currentUser.getId().equals(id)) {
-                throw new ApplicationDaoException("500", "ID error, please try again");
-            }
-        }
-
-        // wstawienie nowego użytkownika
-        User newUser = new User(id, user.getLogin(), user.getPassword(), user.getName(), user.getSurname());
-        usersRepository.add(newUser);
-        return id;
+    public UUID addUser(User user) {
+        usersRepository.add(user);
+        return user.getId();
     }
 
-    public void updateUser(User user) throws ApplicationDaoException {
-        if (!usersRepository.contains(user)) {
+    public void updateUser(User oldUser, User user) throws ApplicationDaoException {
+        if (!usersRepository.contains(oldUser)) {
             throw new ApplicationDaoException("500", "User does not exist");
         }
-
-        User oldUser = getUserById(user.getId());
-        oldUser.setLogin(user.getLogin());
-        oldUser.setPassword(user.getPassword());
-        oldUser.setName(user.getName());
-        oldUser.setSurname(user.getSurname());
+        if(user.getLogin() != null) {
+            oldUser.setLogin(user.getLogin());
+        }
+        if(user.getPassword() != null) {
+            oldUser.setPassword(user.getPassword());
+        }
+        if(user.getName() != null) {
+            oldUser.setName(user.getName());
+        }
+        if(user.getSurname() != null) {
+            oldUser.setSurname(user.getSurname());
+        }
     }
 
     public void removeUser(User user) throws ApplicationDaoException {
@@ -56,6 +45,7 @@ public class UserDao {
         if (!removedUser) {
             throw new ApplicationDaoException("500", "User could not be removed, please try again");
         }
+        archiveRepository.add(user);
     }
 
     public User getUserById(UUID id) throws ApplicationDaoException {
@@ -88,7 +78,18 @@ public class UserDao {
         return result;
     }
 
-    public List<User> getAllUsers() {
+    public List<User> getActiveUsers() {
         return usersRepository;
     }
+
+    public List<User> getArchiveUsers() {
+        return archiveRepository;
+    }
+
+    public List<User> getAllUsers() {
+        List<User> allUsers = new ArrayList<User>(getActiveUsers());
+        allUsers.addAll(getArchiveUsers());
+        return allUsers;
+    }
+
 }
