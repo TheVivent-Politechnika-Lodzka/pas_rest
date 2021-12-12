@@ -55,6 +55,18 @@ public class UserManager {
         if ("".equals(user.getLogin())) {
             throw new ApplicationDaoException("500", "Login cannot be empty");
         }
+        // sprawdzanie nie pustości hasla
+        if ("".equals(user.getPassword())) {
+            throw new ApplicationDaoException("500", "Password cannot be empty");
+        }
+        // sprawdzanie nie pustości imienia
+        if ("".equals(user.getName())) {
+            throw new ApplicationDaoException("500", "Name cannot be empty");
+        }
+        // sprawdzanie nie pustości nazwiska
+        if ("".equals(user.getSurname())) {
+            throw new ApplicationDaoException("500", "Surname cannot be empty");
+        }
 
         // sprawdzanie unikalności loginu i id
         UUID id = UUID.randomUUID();
@@ -95,6 +107,11 @@ public class UserManager {
         if (!userDao.getAllUsers().contains(old)) {
             throw new ApplicationDaoException("500", "User does not exist");
         }
+
+        if (userDao.getAllUsers().contains(userDao.getUserByLogin(user.getLogin()))) {
+            throw new ApplicationDaoException("500", "Room with this number already exist");
+        }
+
         userDao.updateUser(old, user);
     }
 

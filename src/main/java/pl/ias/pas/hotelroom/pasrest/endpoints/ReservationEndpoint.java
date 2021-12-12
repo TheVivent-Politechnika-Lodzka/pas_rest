@@ -79,49 +79,49 @@ public class ReservationEndpoint {
         return resevationManager.getAllReservations();
     }
 
-    //CLIENT\\
+    //BYID\\
     @GET
-    @Path("/byClient/{id}")
+    @Path("/byID/{id}")
     @Produces("application/json")
-    public List<Reservation> getActiveReservationByClient(@PathParam("id") String id) {
+    public List<Reservation> getActiveReservationByClient(@PathParam("id") String id, @QueryParam("client") boolean client, @QueryParam("active") boolean active) {
         try {
-            return resevationManager.giveReservations(UUID.fromString(id), true, false);
+            return resevationManager.giveReservations(UUID.fromString(id), client, active);
         } catch (ApplicationDaoException e) {
             throw new WebApplicationException(e.getMessage());
         }
     }
-    @GET
-    @Path("/byClient/arch/{id}")
-    @Produces("application/json")
-    public List<Reservation> getArchiveReservationByClient(@PathParam("id") String id) {
-        try {
-            return resevationManager.giveReservations(UUID.fromString(id), true, true);
-        } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
-        }
-    }
-
-    //ROOM\\
-    @GET
-    @Path("/byRoom/{id}")
-    @Produces("application/json")
-    public List<Reservation> getActiveReservationByRoom(@PathParam("id") String id) {
-        try {
-            return resevationManager.giveReservations(UUID.fromString(id), false, false);
-        } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
-        }
-    }
-    @GET
-    @Path("/byRoom/arch/{id}")
-    @Produces("application/json")
-    public List<Reservation> getArchiveReservationByRoom(@PathParam("id") String id) {
-        try {
-            return resevationManager.giveReservations(UUID.fromString(id), false, true);
-        } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
-        }
-    }
+//    @GET
+//    @Path("/byClient/arch/{id}")
+//    @Produces("application/json")
+//    public List<Reservation> getArchiveReservationByClient(@PathParam("id") String id) {
+//        try {
+//            return resevationManager.giveReservations(UUID.fromString(id), true, true);
+//        } catch (ApplicationDaoException e) {
+//            throw new WebApplicationException(e.getMessage());
+//        }
+//    }
+//
+//    //ROOM\\
+//    @GET
+//    @Path("/byRoom/{id}")
+//    @Produces("application/json")
+//    public List<Reservation> getActiveReservationByRoom(@PathParam("id") String id) {
+//        try {
+//            return resevationManager.giveReservations(UUID.fromString(id), false, false);
+//        } catch (ApplicationDaoException e) {
+//            throw new WebApplicationException(e.getMessage());
+//        }
+//    }
+//    @GET
+//    @Path("/byRoom/arch/{id}")
+//    @Produces("application/json")
+//    public List<Reservation> getArchiveReservationByRoom(@PathParam("id") String id) {
+//        try {
+//            return resevationManager.giveReservations(UUID.fromString(id), false, true);
+//        } catch (ApplicationDaoException e) {
+//            throw new WebApplicationException(e.getMessage());
+//        }
+//    }
 
 
 }

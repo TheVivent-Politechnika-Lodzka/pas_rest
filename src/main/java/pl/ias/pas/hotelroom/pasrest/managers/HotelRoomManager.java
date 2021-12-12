@@ -33,14 +33,18 @@ public class HotelRoomManager {
         UUID id = UUID.randomUUID();
 
         // sprawdzanie unikalności numeru
-        for (HotelRoom currentHotelRoom : roomDao.getAllRooms()) {
-            if (currentHotelRoom.getRoomNumber() == room.getRoomNumber()) {
-                throw new ApplicationDaoException("500", "Room already exists");
-            }
+        if(roomDao.getAllRooms().contains(roomDao.getRoomByNumber(room.getRoomNumber()))) {
+            throw new ApplicationDaoException("500", "Room already exists");
+        }
+
+        // walidacja danych
+        if(room.getRoomNumber() <= 0 || room.getPrice() <= 0 || room.getCapacity() <= 0) {
+            throw new ApplicationDaoException("500", "Room can't be created, invalid data");
         }
 
         // wstawienie nowego pokoju
         HotelRoom newRoom = new HotelRoom(id, room.getRoomNumber(), room.getPrice(), room.getCapacity(), room.getDescription());
+
 
         return roomDao.addHotelRoom(newRoom);
     }
@@ -64,6 +68,10 @@ public class HotelRoomManager {
     public void updateRoom(HotelRoom old, HotelRoom room) throws ApplicationDaoException, PermissionsException {
         if (!roomDao.getAllRooms().contains(old)) {
             throw new ApplicationDaoException("500", "Room doesn't exist");
+        }
+
+        if (roomDao.getAllRooms().contains(roomDao.getRoomByNumber(room.getRoomNumber()))) {
+            throw new ApplicationDaoException("500", "Room with this number already exist");
         }
 
         if(!old.isAllocated()) {
