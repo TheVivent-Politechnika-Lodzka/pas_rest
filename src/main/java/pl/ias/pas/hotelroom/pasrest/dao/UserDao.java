@@ -1,9 +1,9 @@
 package pl.ias.pas.hotelroom.pasrest.dao;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
+import javax.enterprise.context.ApplicationScoped;
 import java.util.*;
 
 @ApplicationScoped

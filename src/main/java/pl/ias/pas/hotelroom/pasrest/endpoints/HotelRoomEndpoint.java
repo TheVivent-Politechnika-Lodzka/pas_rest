@@ -1,14 +1,14 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Response;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
 import pl.ias.pas.hotelroom.pasrest.managers.HotelRoomManager;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;

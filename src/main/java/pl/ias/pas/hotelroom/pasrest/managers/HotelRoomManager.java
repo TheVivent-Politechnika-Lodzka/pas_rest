@@ -1,7 +1,5 @@
 package pl.ias.pas.hotelroom.pasrest.managers;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
 import pl.ias.pas.hotelroom.pasrest.dao.HotelRoomDao;
 import pl.ias.pas.hotelroom.pasrest.dao.ReservationDao;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
@@ -10,6 +8,8 @@ import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 

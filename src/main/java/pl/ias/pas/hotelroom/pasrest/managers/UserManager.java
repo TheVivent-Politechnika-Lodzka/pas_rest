@@ -1,13 +1,13 @@
 package pl.ias.pas.hotelroom.pasrest.managers;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.inject.Inject;
 import pl.ias.pas.hotelroom.pasrest.dao.UserDao;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 import pl.ias.pas.hotelroom.pasrest.model.UserType;
 
+import javax.enterprise.context.RequestScoped;
+import javax.inject.Inject;
 import java.util.List;
 import java.util.UUID;
 
