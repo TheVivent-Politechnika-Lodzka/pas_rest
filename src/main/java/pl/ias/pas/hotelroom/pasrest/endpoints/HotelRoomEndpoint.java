@@ -38,7 +38,7 @@ public class HotelRoomEndpoint {
     }
 
     //UPDATE\\
-    @PUT
+    @POST
     @Path("/{id}")
     @Consumes("application/json")
     public HotelRoom updateRoom(@PathParam("id") String id, HotelRoom room) {
@@ -55,7 +55,7 @@ public class HotelRoomEndpoint {
     //DELETE\\
     @DELETE
     @Path("/{id}")
-    @Consumes("application/json")
+//    @Consumes("application/json")
     public void removeRoom(@PathParam("id") String id) {
         try {
             roomManager.removeRoom(UUID.fromString(id));
@@ -80,9 +80,9 @@ public class HotelRoomEndpoint {
     }
 
     @GET
-    @Path("/number")
+    @Path("/number/{number}")
     @Produces("application/json")
-    public HotelRoom getRoomByNumber(@QueryParam("number") int number) {
+    public HotelRoom getRoomByNumber(@PathParam("number") int number) {
         try {
             return roomManager.getRoomByNumber(number);
         } catch (ApplicationDaoException e) {

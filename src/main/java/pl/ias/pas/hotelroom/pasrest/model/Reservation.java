@@ -1,8 +1,13 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.Date;
 import java.util.UUID;
 
+@Data
+@NoArgsConstructor
 public class Reservation {
 
     private UUID id;
@@ -13,8 +18,8 @@ public class Reservation {
     private String uid;
     private String rid;
 
-    public Reservation() {
-    }
+//    public Reservation() {
+//    }
 
     // nadawanie id to odpowiedzialność managera
 //    public Reservation(UUID id, User user, HotelRoom room, Date startDate, Date endDate) {
@@ -53,37 +58,37 @@ public class Reservation {
         this.rid = rid;
     }
 
-    public UUID getUid() {
-        return UUID.fromString(uid);
-    }
-
-    public void setUid(String uid) {
-        this.uid = uid;
-    }
-
-    public UUID getRid() {
-        return UUID.fromString(rid);
-    }
-
-    public void setRid(String rid) {
-        this.rid = rid;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public Date getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate() {
-        this.startDate = startDate;
-    }
-
-    public Date getEndDate() {
-        return endDate;
-    }
+//    public UUID getUid() {
+//        return UUID.fromString(uid);
+//    }
+//
+//    public void setUid(String uid) {
+//        this.uid = uid;
+//    }
+//
+//    public UUID getRid() {
+//        return UUID.fromString(rid);
+//    }
+//
+//    public void setRid(String rid) {
+//        this.rid = rid;
+//    }
+//
+//    public UUID getId() {
+//        return id;
+//    }
+//
+//    public Date getStartDate() {
+//        return startDate;
+//    }
+//
+//    public void setStartDate() {
+//        this.startDate = startDate;
+//    }
+//
+//    public Date getEndDate() {
+//        return endDate;
+//    }
 
     public void setEndDate(Date endDate) {
         if(this.startDate.after(endDate)) {

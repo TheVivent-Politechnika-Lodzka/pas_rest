@@ -40,7 +40,7 @@ public class UserEndpoint {
     }
 
     //UPDATE\\
-    @PUT
+    @POST
     @Path("/{id}")
     @Consumes("application/json")
     public void updateUser(@PathParam("id") String id, User user) {
@@ -87,9 +87,9 @@ public class UserEndpoint {
     }
 
     @GET
-    @Path("/login")
+    @Path("/login/{login}")
     @Produces("application/json")
-    public User getUserByLogin(@QueryParam("login") String login) {
+    public User getUserByLogin(@PathParam("login") String login) {
         try {
             return userManager.getUserByLogin(login);
         } catch (ApplicationDaoException e) {

@@ -37,7 +37,7 @@ public class ReservationEndpoint {
     }
 
     //UPDATE\\
-    @PUT
+    @POST
     @Path("/{id}")
     @Consumes("application/json")
     public void updateReservation(@PathParam("id") String id, Reservation reservation) {
@@ -51,7 +51,7 @@ public class ReservationEndpoint {
     //DELETE\\
     @DELETE
     @Path("/{id}")
-    @Consumes("application/json")
+//    @Consumes("application/json")
     public void archiveReservation(@PathParam("id") String id) {
         try {
             resevationManager.archiveReservation(UUID.fromString(id));
