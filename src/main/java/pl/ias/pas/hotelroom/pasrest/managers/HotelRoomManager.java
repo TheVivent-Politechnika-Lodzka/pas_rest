@@ -48,7 +48,7 @@ public class HotelRoomManager {
     public void removeRoom(UUID id) throws ApplicationDaoException {
         HotelRoom room = roomDao.getRoomById(id);
         for(Reservation reservation: reservationDao.getActualReservations()) {
-            if(roomDao.getRoomById(reservation.getRid()) == room) {
+            if(roomDao.getRoomById(reservation.getRoomId()) == room) {
                 throw new ApplicationDaoException("500", "Room is already allocated");
             }
         }

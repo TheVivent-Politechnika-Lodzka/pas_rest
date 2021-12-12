@@ -36,9 +36,9 @@ public class ReservationManager {
         HotelRoom room;
 
         //sprawdzenie czy klient i pokoj istnieja
-        if(userDao.getUserById(reservation.getUid()) != null && roomDao.getRoomById(reservation.getRid()) != null) {
-            user = userDao.getUserById(reservation.getUid());
-            room = roomDao.getRoomById(reservation.getRid());
+        if(userDao.getUserById(reservation.getUserId()) != null && roomDao.getRoomById(reservation.getRoomId()) != null) {
+            user = userDao.getUserById(reservation.getUserId());
+            room = roomDao.getRoomById(reservation.getRoomId());
         } else {
             throw new ApplicationDaoException("500", "User or room doesn't exist");
         }
@@ -48,19 +48,19 @@ public class ReservationManager {
             throw new ApplicationDaoException("500", "Room is already occupied");
         }
 
-        room.setAllocation(true);
+        room.setAllocated(true);
 
 
         //sprawdzenie czy są podane daty rozpoczęcia/zakończenia
         if(reservation.getStartDate() != null) {
             if(reservation.getEndDate() != null) {
-                newReservation = new Reservation(id, user.getId().toString(), room.getId().toString(), reservation.getStartDate(), reservation.getEndDate());
+                newReservation = new Reservation(id, user.getId(), room.getId(), reservation.getStartDate(), reservation.getEndDate());
                 return reservationDao.addReservationToArchive(newReservation);
             } else {
-                newReservation = new Reservation(id, user.getId().toString(), room.getId().toString(), reservation.getStartDate());
+                newReservation = new Reservation(id, user.getId(), room.getId(), reservation.getStartDate());
             }
         } else {
-            newReservation = new Reservation(id, user.getId().toString(), room.getId().toString());
+            newReservation = new Reservation(id, user.getId(), room.getId());
         }
         return reservationDao.addReservation(newReservation);
     }
@@ -78,7 +78,7 @@ public class ReservationManager {
             throw new ApplicationDaoException("500", "Reservation could not be removed, please try again");
         }
 
-        roomDao.getRoomById(reservation.getRid()).setAllocation(false);
+        roomDao.getRoomById(reservation.getRoomId()).setAllocated(false);
         reservationDao.endReservation(reservation);
     }
 
@@ -110,7 +110,7 @@ public class ReservationManager {
         }
         for(Reservation res: getAllReservations()) {
             if(client) {
-                if(res.getUid().equals(user.getId())) {
+                if(res.getUserId().equals(user.getId())) {
                     if(active) {
                         reservation.add(res);
                     } else {
@@ -118,7 +118,7 @@ public class ReservationManager {
                     }
                 }
             } else {
-                if(res.getRid().equals(room.getId())) {
+                if(res.getRoomId().equals(room.getId())) {
                     if (active) {
                         reservation.add(res);
                     } else {

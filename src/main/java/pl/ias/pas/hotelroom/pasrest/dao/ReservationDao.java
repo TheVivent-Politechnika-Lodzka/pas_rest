@@ -33,11 +33,11 @@ public class ReservationDao {
     }
 
     public void updateReservation(Reservation oldReservation, Reservation reservation) {
-        if(reservation.getRid() != null) {
-            oldReservation.setRid(reservation.getRid().toString());
+        if(reservation.getRoomId() != null) {
+            oldReservation.setRoomId(reservation.getRoomId());
         }
-        if(reservation.getUid() != null) {
-            oldReservation.setUid(reservation.getUid().toString());
+        if(reservation.getUserId() != null) {
+            oldReservation.setUserId(reservation.getUserId());
         }
         if(reservation.getStartDate() != null) {
             oldReservation.setStartDate(reservation.getStartDate());
