@@ -9,18 +9,15 @@ import java.util.*;
 @ApplicationScoped
 public class UserDao {
 
-    private List<User> usersRepository = Collections.synchronizedList(new ArrayList<User>());
-    private List<User> archiveRepository = Collections.synchronizedList(new ArrayList<User>());
+    private List<User> usersRepository = Collections.synchronizedList(new ArrayList<>());
+    private List<User> archiveRepository = Collections.synchronizedList(new ArrayList<>());
 
     public UUID addUser(User user) {
         usersRepository.add(user);
         return user.getId();
     }
 
-    public void updateUser(User oldUser, User user) throws ApplicationDaoException {
-        if (!usersRepository.contains(oldUser)) {
-            throw new ApplicationDaoException("500", "User does not exist");
-        }
+    public void updateUser(User oldUser, User user) {
         if(user.getLogin() != null) {
             oldUser.setLogin(user.getLogin());
         }
@@ -35,17 +32,9 @@ public class UserDao {
         }
     }
 
-    public void removeUser(User user) throws ApplicationDaoException {
-        if (!usersRepository.contains(user)) {
-            throw new ApplicationDaoException("500", "User does not exist");
-        }
-
-        boolean removedUser = usersRepository.remove(user);
-
-        if (!removedUser) {
-            throw new ApplicationDaoException("500", "User could not be removed, please try again");
-        }
+    public void removeUser(User user) {
         archiveRepository.add(user);
+        usersRepository.remove(user);
     }
 
     public User getUserById(UUID id) throws ApplicationDaoException {
@@ -87,7 +76,7 @@ public class UserDao {
     }
 
     public List<User> getAllUsers() {
-        List<User> allUsers = new ArrayList<User>(getActiveUsers());
+        List<User> allUsers = new ArrayList<>(getActiveUsers());
         allUsers.addAll(getArchiveUsers());
         return allUsers;
     }

@@ -2,35 +2,25 @@ package pl.ias.pas.hotelroom.pasrest.dao;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
-import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
-import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import java.util.*;
+
 
 @ApplicationScoped
 public class ReservationDao {
 
-    private List<Reservation> reservationsRepository = Collections.synchronizedList(new ArrayList<Reservation>());
-    private List<Reservation> archiveRepository = Collections.synchronizedList(new ArrayList<Reservation>());
+    private List<Reservation> reservationsRepository = Collections.synchronizedList(new ArrayList<>());
+    private List<Reservation> archiveRepository = Collections.synchronizedList(new ArrayList<>());
 
-    public UUID addReservation(Reservation reserv, User user, HotelRoom room) {
-        UUID id = UUID.randomUUID();
-        Reservation newReservation;
+    public UUID addReservation(Reservation reservation) {
+        reservationsRepository.add(reservation);
+        return reservation.getId();
+    }
 
-        //sprawdzenie czy są podane daty rozpoczęcia/zakończenia
-        if(reserv.getStartDate() != null) {
-            if(reserv.getEndDate() != null) {
-                newReservation = new Reservation(id, user.getId().toString(), room.getId().toString(), reserv.getStartDate(), reserv.getEndDate());
-            } else {
-                newReservation = new Reservation(id, user.getId().toString(), room.getId().toString(), reserv.getStartDate());
-            }
-        } else {
-            newReservation = new Reservation(id, user.getId().toString(), room.getId().toString());
-        }
-
-        reservationsRepository.add(newReservation);
-        return id;
+    public UUID addReservationToArchive(Reservation reservation) {
+        archiveRepository.add(reservation);
+        return reservation.getId();
     }
 
     public Reservation getReservationById(UUID id) throws ApplicationDaoException {
@@ -42,10 +32,7 @@ public class ReservationDao {
         throw new ApplicationDaoException("500", "Reservation does not exist");
     }
 
-    public void updateReservation(Reservation oldReservation, Reservation reservation) throws ApplicationDaoException {
-        if (!reservationsRepository.contains(oldReservation)) {
-            throw new ApplicationDaoException("500", "Reservation does not exist");
-        }
+    public void updateReservation(Reservation oldReservation, Reservation reservation) {
         if(reservation.getRid() != null) {
             oldReservation.setRid(reservation.getRid().toString());
         }
@@ -58,12 +45,11 @@ public class ReservationDao {
     }
 
     public void endReservation(Reservation reservation) {
-        reservationsRepository.remove(reservation);
-        archiveRepository.add(reservation);
-
         if(reservation.getEndDate() == null) {
             reservation.setEndDate(new Date());
         }
+        archiveRepository.add(reservation);
+        reservationsRepository.remove(reservation);
     }
 
     public List<Reservation> getActualReservations() {

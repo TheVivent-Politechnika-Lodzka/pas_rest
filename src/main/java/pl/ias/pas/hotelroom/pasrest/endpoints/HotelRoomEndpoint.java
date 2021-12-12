@@ -8,7 +8,6 @@ import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
 import pl.ias.pas.hotelroom.pasrest.managers.HotelRoomManager;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
-import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import java.net.URI;
 import java.util.List;

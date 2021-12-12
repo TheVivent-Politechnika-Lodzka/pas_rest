@@ -8,7 +8,6 @@ import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 import pl.ias.pas.hotelroom.pasrest.model.UserType;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,8 +27,6 @@ public class UserManager {
         this.accesLevel = accesLevel;
     }
 
-    // TODO zastanowić się, czy rzucanie wyjątków przy wyszukiwaniu jest ok
-    // TODO czy nie lepiej zmienić na zwracanie nulla, jeśli nie znajdzie użytkownika
     public User getUserByLogin(String login) throws ApplicationDaoException {
         return userDao.getUserByLogin(login);
     }
@@ -82,6 +79,12 @@ public class UserManager {
 //        }
 
         User user = userDao.getUserById(id);
+        //czy uzytkownik jest w bazie
+        if (!userDao.getActiveUsers().contains(user)) {
+            throw new ApplicationDaoException("500", "User does not exist");
+        }
+
+        user.setActive(false);
         userDao.removeUser(user);
     }
 
@@ -89,6 +92,9 @@ public class UserManager {
 //        if (accesLevel != UserType.USER_ADMIN) {
 //            throw new PermissionsException("403", "You don't have permission to update user");
 //        }
+        if (!userDao.getAllUsers().contains(old)) {
+            throw new ApplicationDaoException("500", "User does not exist");
+        }
         userDao.updateUser(old, user);
     }
 

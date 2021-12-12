@@ -52,10 +52,20 @@ public class HotelRoomManager {
                 throw new ApplicationDaoException("500", "Room is already allocated");
             }
         }
+
+        //sprawdzenie czy pokoj jest w bazie
+        if (!roomDao.getAllRooms().contains(room)) {
+            throw new ApplicationDaoException("500", "Room couldn't exist");
+        }
+
         roomDao.removeRoom(room);
     }
 
     public void updateRoom(HotelRoom old, HotelRoom room) throws ApplicationDaoException, PermissionsException {
+        if (!roomDao.getAllRooms().contains(old)) {
+            throw new ApplicationDaoException("500", "Room doesn't exist");
+        }
+
         if(!old.isAllocated()) {
             roomDao.updateHotelRoom(old, room);
         }

@@ -6,7 +6,6 @@ import pl.ias.pas.hotelroom.pasrest.dao.HotelRoomDao;
 import pl.ias.pas.hotelroom.pasrest.dao.ReservationDao;
 import pl.ias.pas.hotelroom.pasrest.dao.UserDao;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 import pl.ias.pas.hotelroom.pasrest.model.User;
@@ -31,24 +30,17 @@ public class ReservationManager {
 
     public UUID addReservation(Reservation reservation) throws ApplicationDaoException {
 
+        UUID id = UUID.randomUUID();
+        Reservation newReservation;
         User user;
         HotelRoom room;
 
+        //sprawdzenie czy klient i pokoj istnieja
         if(userDao.getUserById(reservation.getUid()) != null && roomDao.getRoomById(reservation.getRid()) != null) {
             user = userDao.getUserById(reservation.getUid());
             room = roomDao.getRoomById(reservation.getRid());
         } else {
             throw new ApplicationDaoException("500", "User or room doesn't exist");
-        }
-
-        //sprawdzenie czy klient istnieje (jako aktywny)
-        if(!userDao.getActiveUsers().contains(user)) {
-            throw new ApplicationDaoException("500", "User doesn't exist");
-        }
-
-        //sprawdzenie czy pokoj istnieje
-        if(!roomDao.getAllRooms().contains(room)) {
-            throw new ApplicationDaoException("500", "Room doesn't exist");
         }
 
         //sprawdzenie czy nie jest juz przypadkiem wynajmowany
@@ -57,7 +49,20 @@ public class ReservationManager {
         }
 
         room.setAllocation(true);
-        return reservationDao.addReservation(reservation, user, room);
+
+
+        //sprawdzenie czy są podane daty rozpoczęcia/zakończenia
+        if(reservation.getStartDate() != null) {
+            if(reservation.getEndDate() != null) {
+                newReservation = new Reservation(id, user.getId().toString(), room.getId().toString(), reservation.getStartDate(), reservation.getEndDate());
+                return reservationDao.addReservationToArchive(newReservation);
+            } else {
+                newReservation = new Reservation(id, user.getId().toString(), room.getId().toString(), reservation.getStartDate());
+            }
+        } else {
+            newReservation = new Reservation(id, user.getId().toString(), room.getId().toString());
+        }
+        return reservationDao.addReservation(newReservation);
     }
 
     public void archiveReservation(UUID id) throws ApplicationDaoException {
@@ -78,37 +83,24 @@ public class ReservationManager {
     }
 
     public void updateReservation(Reservation old, Reservation reservation) throws ApplicationDaoException {
+        if (!getAllReservations().contains(old)) {
+            throw new ApplicationDaoException("500", "Reservation does not exist");
+        }
+
         reservationDao.updateReservation(old, reservation);
     }
 
-    public User getUserFromId(UUID id) {
-        for(User user: userDao.getAllUsers()) {
-            if(user.getId().equals(id)) {
-                return user;
-            }
-        }
-        return null;
-    }
 
-    public HotelRoom getRoomFromId(UUID id) {
-        for(HotelRoom room: roomDao.getAllRooms()) {
-            if(room.getId().equals(id)) {
-                return room;
-            }
-        }
-        return null;
-    }
-
-    public List<Reservation> giveArchiveReservation() {
+    public List<Reservation> getArchiveReservation() {
         return reservationDao.getArchiveReservations();
     }
 
-    public List<Reservation> giveActualReservation() {
+    public List<Reservation> getActualReservation() {
         return reservationDao.getActualReservations();
     }
 
-    public List<Reservation> giveReservation(UUID id, boolean client, boolean active) throws ApplicationDaoException {
-        List<Reservation> reservation = new ArrayList<Reservation>();
+    public List<Reservation> giveReservations(UUID id, boolean client, boolean active) throws ApplicationDaoException {
+        List<Reservation> reservation = new ArrayList<>();
         User user = new User();
         HotelRoom room = new HotelRoom();
         if (client && userDao.getActiveUsers().contains(userDao.getUserById(id))) {
@@ -116,7 +108,7 @@ public class ReservationManager {
         } else if (!client && roomDao.getAllRooms().contains(roomDao.getRoomById(id))) {
             room = roomDao.getRoomById(id);
         }
-        for(Reservation res: giveAllReservations()) {
+        for(Reservation res: getAllReservations()) {
             if(client) {
                 if(res.getUid().equals(user.getId())) {
                     if(active) {
@@ -138,8 +130,8 @@ public class ReservationManager {
         return reservation;
     }
 
-    public List<Reservation> giveAllReservations() {
-        List<Reservation> allReservations = new ArrayList<Reservation>(reservationDao.getActualReservations());
+    public List<Reservation> getAllReservations() {
+        List<Reservation> allReservations = new ArrayList<>(reservationDao.getActualReservations());
         allReservations.addAll(reservationDao.getArchiveReservations());
         return allReservations;
     }

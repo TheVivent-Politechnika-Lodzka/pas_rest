@@ -4,7 +4,6 @@ package pl.ias.pas.hotelroom.pasrest.endpoints;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
@@ -12,7 +11,6 @@ import pl.ias.pas.hotelroom.pasrest.managers.UserManager;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,12 +29,12 @@ public class UserEndpoint {
     @POST
     @Consumes("application/json")
     public Response createUser(User user) {
-        UUID createdUser = null;
+        UUID createdUser;
         try {
             createdUser = userManager.addUser(user);
         } catch (ApplicationDaoException | PermissionsException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            //Jako basic jest 500
+            throw new WebApplicationException(e.getMessage());
         }
         return Response.created(URI.create("/user/" + createdUser)).build();
     }
@@ -49,8 +47,7 @@ public class UserEndpoint {
         try {
             userManager.updateUser(userManager.getUserById(UUID.fromString(id)), user);
         } catch (ApplicationDaoException | PermissionsException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            throw new WebApplicationException(e.getMessage());
         }
     }
 
@@ -62,8 +59,7 @@ public class UserEndpoint {
         try {
             userManager.removeUser(UUID.fromString(id));
         } catch (ApplicationDaoException | PermissionsException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            throw new WebApplicationException(e.getMessage());
         }
     }
 
@@ -75,10 +71,8 @@ public class UserEndpoint {
         try {
             return userManager.getUserById(UUID.fromString(id));
         } catch (ApplicationDaoException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            throw new WebApplicationException(e.getMessage());
         }
-        return null;
     }
 
     @GET
@@ -88,10 +82,8 @@ public class UserEndpoint {
         try {
             return userManager.searchUsers(login);
         } catch (ApplicationDaoException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            throw new WebApplicationException(e.getMessage());
         }
-        return null;
     }
 
     @GET
@@ -101,10 +93,8 @@ public class UserEndpoint {
         try {
             return userManager.getUserByLogin(login);
         } catch (ApplicationDaoException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            throw new WebApplicationException(e.getMessage());
         }
-        return null;
     }
 
     @GET
