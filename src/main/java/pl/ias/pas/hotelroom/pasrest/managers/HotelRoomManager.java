@@ -25,7 +25,7 @@ public class HotelRoomManager {
         return roomDao.getRoomByNumber(number);
     }
 
-    public HotelRoom getRoomById(UUID id) throws ApplicationDaoException {
+    public HotelRoom getRoomById(UUID id) {
         return roomDao.getRoomById(id);
     }
 
@@ -51,10 +51,9 @@ public class HotelRoomManager {
 
     public void removeRoom(UUID id) throws ApplicationDaoException {
         HotelRoom room = roomDao.getRoomById(id);
-        for(Reservation reservation: reservationDao.getActualReservations()) {
-            if(roomDao.getRoomById(reservation.getRoomId()) == room) {
-                throw new ApplicationDaoException("500", "Room is already allocated");
-            }
+
+        if(room.isAllocated()) {
+            throw new ApplicationDaoException("500", "Room is already allocated");
         }
 
         //sprawdzenie czy pokoj jest w bazie

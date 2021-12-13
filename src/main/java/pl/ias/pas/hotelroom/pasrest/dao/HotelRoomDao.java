@@ -21,13 +21,13 @@ public class HotelRoomDao {
     }
 
     public void updateHotelRoom(HotelRoom oldRoom, HotelRoom room) {
-        if(room.getRoomNumber() <= 0) {
+        if(room.getRoomNumber() > 0) {
             oldRoom.setRoomNumber(room.getRoomNumber());
         }
-        if(room.getPrice() <= 0) {
+        if(room.getPrice() > 0) {
             oldRoom.setPrice(room.getPrice());
         }
-        if(room.getCapacity() <= 0) {
+        if(room.getCapacity() > 0) {
             oldRoom.setCapacity(room.getCapacity());
         }
         if(room.getDescription() != null) {

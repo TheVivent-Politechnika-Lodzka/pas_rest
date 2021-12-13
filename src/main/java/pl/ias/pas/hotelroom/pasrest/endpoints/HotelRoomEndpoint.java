@@ -66,12 +66,12 @@ public class HotelRoomEndpoint {
     @Path("/{id}")
     @Produces("application/json")
     public Response getRoomById(@PathParam("id") String id) {
-        HotelRoom room;
-        try {
-            room = roomManager.getRoomById(UUID.fromString(id));
-        } catch (ApplicationDaoException e) {
+        HotelRoom room = roomManager.getRoomById(UUID.fromString(id));
+
+        if (room == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Room not found").build();
         }
+
         return Response.ok(room).build();
     }
 
