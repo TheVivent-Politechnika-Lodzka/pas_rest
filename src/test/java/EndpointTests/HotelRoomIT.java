@@ -153,6 +153,51 @@ public class HotelRoomIT {
         for (HotelRoom room : allRooms) {
             assertFalse(room.isAllocated());
         }
+    }
 
+    @Test
+    public void negativeUpdateRoom(){
+        // stwórz zasób pokoju
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(BASE_URI);
+        HotelRoom toRest = new HotelRoom(UUID.randomUUID(),3, 30,22, "cosy");
+        Response response =  target.path("api").path("room").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        assertEquals(201, response.getStatus());
+
+        // pobierz utworzone id
+        String id = response.getLocation().toString();
+        id = id.substring(id.lastIndexOf("/")+1);
+
+        // pobierz zasób pokoju
+        HotelRoom fromRest = target.path("api").path("room").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(HotelRoom.class);
+
+        // sprawdź czy pobrane dane są takie same jak wysłane
+        assertEquals(toRest.getRoomNumber(), fromRest.getRoomNumber());
+        assertEquals(toRest.getPrice(), fromRest.getPrice());
+        assertEquals(toRest.getCapacity(), fromRest.getCapacity());
+        assertEquals(toRest.getDescription(), fromRest.getDescription());
+
+        // zmodyfikuj dane
+        fromRest.setRoomNumber(-2);
+        fromRest.setPrice(-3);
+        fromRest.setCapacity(0);
+        fromRest.setDescription(null);
+
+        // wysyłaj zmodyfikowane dane
+        response = target.path("api").path("room").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).post(Entity.json(fromRest));
+        assertEquals(200, response.getStatus());
+
+        // pobierz zasób pokoju
+        HotelRoom fromRestModified = target.path("api").path("room").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(HotelRoom.class);
+        assertNotEquals(fromRest.getRoomNumber(), fromRestModified.getRoomNumber());
+        assertNotEquals(fromRest.getPrice(), fromRestModified.getPrice());
+        assertNotEquals(fromRest.getCapacity(), fromRestModified.getCapacity());
+        assertNotEquals(fromRest.getDescription(), fromRestModified.getDescription());
+
+        // sprawdz, czy dane pozostaly
+        assertEquals(toRest.getRoomNumber(), fromRestModified.getRoomNumber());
+        assertEquals(toRest.getPrice(), fromRestModified.getPrice());
+        assertEquals(toRest.getCapacity(), fromRestModified.getCapacity());
+        assertEquals(toRest.getDescription(), fromRestModified.getDescription());
     }
 }
