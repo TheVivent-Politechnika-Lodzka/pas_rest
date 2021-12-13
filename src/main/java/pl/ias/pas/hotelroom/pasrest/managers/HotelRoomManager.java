@@ -65,13 +65,9 @@ public class HotelRoomManager {
         roomDao.removeRoom(room);
     }
 
-    public void updateRoom(HotelRoom old, HotelRoom room) throws ApplicationDaoException, PermissionsException {
+    public void updateRoom(HotelRoom old, HotelRoom room) throws ApplicationDaoException {
         if (!roomDao.getAllRooms().contains(old)) {
             throw new ApplicationDaoException("500", "Room doesn't exist");
-        }
-
-        if (roomDao.getAllRooms().contains(roomDao.getRoomByNumber(room.getRoomNumber()))) {
-            throw new ApplicationDaoException("500", "Room with this number already exist");
         }
 
         if(!old.isAllocated()) {

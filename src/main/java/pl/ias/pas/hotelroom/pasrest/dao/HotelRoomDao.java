@@ -39,13 +39,13 @@ public class HotelRoomDao {
         roomsRepository.remove(room);
     }
 
-    public HotelRoom getRoomById(UUID id) throws ApplicationDaoException {
+    public HotelRoom getRoomById(UUID id) {
         for (HotelRoom room : roomsRepository) {
             if (room.getId().equals(id)) {
                 return room;
             }
         }
-        throw new ApplicationDaoException("500", "Room doesn't exist");
+        return null;
     }
 
     public HotelRoom getRoomByNumber(int number) {

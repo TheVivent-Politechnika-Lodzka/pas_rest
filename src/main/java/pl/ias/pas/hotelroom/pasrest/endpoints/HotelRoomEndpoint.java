@@ -27,12 +27,11 @@ public class HotelRoomEndpoint {
     @POST
     @Consumes("application/json")
     public Response createRoom(HotelRoom room) {
-        UUID createdRoom = null;
+        UUID createdRoom;
         try {
             createdRoom = roomManager.addRoom(room);
-        } catch (ApplicationDaoException | PermissionsException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+        } catch (ApplicationDaoException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
         return Response.created(URI.create("/room/" + createdRoom)).build();
     }
@@ -41,61 +40,58 @@ public class HotelRoomEndpoint {
     @POST
     @Path("/{id}")
     @Consumes("application/json")
-    public HotelRoom updateRoom(@PathParam("id") String id, HotelRoom room) {
+    public Response updateRoom(@PathParam("id") String id, HotelRoom room) {
         try {
             roomManager.updateRoom(roomManager.getRoomById(UUID.fromString(id)), room);
-            return room;
-        } catch (ApplicationDaoException | PermissionsException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+        } catch (ApplicationDaoException e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
-        return room;
+        return Response.ok().build();
     }
 
     //DELETE\\
     @DELETE
     @Path("/{id}")
-//    @Consumes("application/json")
-    public void removeRoom(@PathParam("id") String id) {
+    public Response removeRoom(@PathParam("id") String id) {
         try {
             roomManager.removeRoom(UUID.fromString(id));
         } catch (ApplicationDaoException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
+        return Response.ok().build();
     }
 
     //READ\\
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public HotelRoom getRoomById(@PathParam("id") String id) {
+    public Response getRoomById(@PathParam("id") String id) {
+        HotelRoom room;
         try {
-            return roomManager.getRoomById(UUID.fromString(id));
+            room = roomManager.getRoomById(UUID.fromString(id));
         } catch (ApplicationDaoException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            return Response.status(Response.Status.NOT_FOUND).entity("Room not found").build();
         }
-        return null;
+        return Response.ok(room).build();
     }
 
     @GET
     @Path("/number/{number}")
     @Produces("application/json")
-    public HotelRoom getRoomByNumber(@PathParam("number") int number) {
+    public Response getRoomByNumber(@PathParam("number") int number) {
+        HotelRoom room;
         try {
-            return roomManager.getRoomByNumber(number);
+            room = roomManager.getRoomByNumber(number);
         } catch (ApplicationDaoException e) {
-            // TODO poprawna obsługa błędów
-            e.printStackTrace();
+            return Response.status(Response.Status.NOT_FOUND).entity("Room not found").build();
         }
-        return null;
+        return Response.ok(room).build();
     }
 
     @GET
     @Path("/all")
     @Produces("application/json")
-    public List<HotelRoom> getAllRooms() {
-        return roomManager.giveAllRooms();
+    public Response getAllRooms() {
+        return Response.ok(roomManager.giveAllRooms()).build();
     }
 }
