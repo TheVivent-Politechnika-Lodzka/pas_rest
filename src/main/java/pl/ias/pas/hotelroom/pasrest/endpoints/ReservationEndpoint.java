@@ -17,7 +17,7 @@ import java.util.UUID;
 public class ReservationEndpoint {
 
     @Inject
-    private ReservationManager resevationManager;
+    private ReservationManager reservationManager;
 
     // przykładowe zapytanie tworzące nowej rezerwacji, trza niestety uzupelniac
     // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/reservation uid=  rid=
@@ -27,13 +27,17 @@ public class ReservationEndpoint {
     @POST
     @Consumes("application/json")
     public Response createReservation(Reservation reservation) {
-        UUID createdResevation;
+//        return Response.ok().build();
+
+        UUID createdReservation;
         try {
-            createdResevation = resevationManager.addReservation(reservation);
+            createdReservation = reservationManager.addReservation(reservation);
         } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
+//            throw new WebApplicationException(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
-        return Response.created(URI.create("/reservation/" + createdResevation)).build();
+
+        return Response.created(URI.create("/reservation/" + createdReservation)).build();
     }
 
     //UPDATE\\
@@ -42,7 +46,7 @@ public class ReservationEndpoint {
     @Consumes("application/json")
     public void updateReservation(@PathParam("id") String id, Reservation reservation) {
         try {
-            resevationManager.updateReservation(resevationManager.getReservationById(UUID.fromString(id)), reservation);
+            reservationManager.updateReservation(reservationManager.getReservationById(UUID.fromString(id)), reservation);
         } catch (ApplicationDaoException e) {
             throw new WebApplicationException(e.getMessage());
         }
@@ -54,7 +58,7 @@ public class ReservationEndpoint {
 //    @Consumes("application/json")
     public void archiveReservation(@PathParam("id") String id) {
         try {
-            resevationManager.archiveReservation(UUID.fromString(id));
+            reservationManager.archiveReservation(UUID.fromString(id));
         } catch (ApplicationDaoException e) {
             throw new WebApplicationException(e.getMessage());
         }
@@ -66,7 +70,7 @@ public class ReservationEndpoint {
     @Produces("application/json")
     public Reservation getReservationById(@PathParam("id") String id) {
         try {
-            return resevationManager.getReservationById(UUID.fromString(id));
+            return reservationManager.getReservationById(UUID.fromString(id));
         } catch (ApplicationDaoException e) {
             throw new WebApplicationException(e.getMessage());
         }
@@ -76,7 +80,7 @@ public class ReservationEndpoint {
     @Path("/all")
     @Produces("application/json")
     public List<Reservation> getAllReservation() {
-        return resevationManager.getAllReservations();
+        return reservationManager.getAllReservations();
     }
 
     //BYID\\
@@ -85,7 +89,7 @@ public class ReservationEndpoint {
     @Produces("application/json")
     public List<Reservation> getActiveReservationByClient(@PathParam("id") String id, @QueryParam("client") boolean client, @QueryParam("active") boolean active) {
         try {
-            return resevationManager.giveReservations(UUID.fromString(id), client, active);
+            return reservationManager.giveReservations(UUID.fromString(id), client, active);
         } catch (ApplicationDaoException e) {
             throw new WebApplicationException(e.getMessage());
         }

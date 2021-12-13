@@ -10,9 +10,12 @@ import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.naming.spi.ResolveResult;
 import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
+
 
 @RequestScoped
 public class ReservationManager {
@@ -32,14 +35,11 @@ public class ReservationManager {
 
         UUID id = UUID.randomUUID();
         Reservation newReservation;
-        User user;
-        HotelRoom room;
+        User user = userDao.getUserById(reservation.getUserId());
+        HotelRoom room = roomDao.getRoomById(reservation.getRoomId());
 
         //sprawdzenie czy klient i pokoj istnieja
-        if(userDao.getUserById(reservation.getUserId()) != null && roomDao.getRoomById(reservation.getRoomId()) != null) {
-            user = userDao.getUserById(reservation.getUserId());
-            room = roomDao.getRoomById(reservation.getRoomId());
-        } else {
+        if(user == null || room == null) {
             throw new ApplicationDaoException("500", "User or room doesn't exist");
         }
 
@@ -49,37 +49,34 @@ public class ReservationManager {
         }
 
         room.setAllocated(true);
+        newReservation = new Reservation(id, user.getId(), room.getId());
 
-
-        //sprawdzenie czy są podane daty rozpoczęcia/zakończenia
-        if(reservation.getStartDate() != null) {
-            if(reservation.getEndDate() != null) {
-                newReservation = new Reservation(id, user.getId(), room.getId(), reservation.getStartDate(), reservation.getEndDate());
-                return reservationDao.addReservationToArchive(newReservation);
-            } else {
-                newReservation = new Reservation(id, user.getId(), room.getId(), reservation.getStartDate());
-            }
+        if (reservation.getStartDate() != null) {
+            newReservation.setStartDate(reservation.getStartDate());
         } else {
-            newReservation = new Reservation(id, user.getId(), room.getId());
+            newReservation.setStartDate(System.currentTimeMillis());
         }
+
+        if (reservation.getEndDate() != null) {
+            newReservation.setEndDate(reservation.getEndDate());
+        }
+
         return reservationDao.addReservation(newReservation);
     }
 
     public void archiveReservation(UUID id) throws ApplicationDaoException {
-        Reservation reservation = reservationDao.getReservationById(id);
 
-        if (!reservationDao.getActualReservations().contains(reservation)) {
+        if (reservationDao.getReservationById(id) == null) {
             throw new ApplicationDaoException("500", "Reservation does not exist");
         }
 
-        boolean removedReservation = reservationDao.getActualReservations().remove(reservation);
-
-        if (!removedReservation) {
-            throw new ApplicationDaoException("500", "Reservation could not be removed, please try again");
-        }
-
-        roomDao.getRoomById(reservation.getRoomId()).setAllocated(false);
-        reservationDao.endReservation(reservation);
+        reservationDao.endReservation(id);
+//        if (!removedReservation) {
+//            throw new ApplicationDaoException("500", "Reservation could not be removed, please try again");
+//        }
+//
+//        roomDao.getRoomById(reservation.getRoomId()).setAllocated(false);
+//        reservationDao.endReservation(reservation);
     }
 
     public void updateReservation(Reservation old, Reservation reservation) throws ApplicationDaoException {
@@ -91,20 +88,24 @@ public class ReservationManager {
     }
 
 
-    public List<Reservation> getArchiveReservation() {
-        return reservationDao.getArchiveReservations();
+    public List<Reservation> getArchivedReservation() {
+        return reservationDao.getArchivedReservations();
     }
 
-    public List<Reservation> getActualReservation() {
-        return reservationDao.getActualReservations();
+    public List<Reservation> getActiveReservation() {
+        return reservationDao.getActiveReservations();
+    }
+
+    public List<Reservation> getAllReservations() {
+        return reservationDao.getAllReservations();
     }
 
     private List<Reservation> searchingReservation(boolean active) {
         List<Reservation> searching = new ArrayList<>();
         if(active) {
-            searching = getActualReservation();
+//            searching = getActualReservation();
         } else {
-            searching = getArchiveReservation();
+//            searching = getArchiveReservation();
         }
         return searching;
     }
@@ -133,11 +134,6 @@ public class ReservationManager {
         return reservation;
     }
 
-    public List<Reservation> getAllReservations() {
-        List<Reservation> allReservations = new ArrayList<>(reservationDao.getActualReservations());
-        allReservations.addAll(reservationDao.getArchiveReservations());
-        return allReservations;
-    }
 
 
 }

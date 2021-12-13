@@ -42,7 +42,8 @@ public class UserDao {
                 return user;
             }
         }
-        throw new ApplicationDaoException("500", "User does not exist");
+        return null;
+//        throw new ApplicationDaoException("500", "User does not exist");
     }
 
     public User getUserByLogin(String login) throws ApplicationDaoException {
@@ -51,7 +52,8 @@ public class UserDao {
                 return user;
             }
         }
-        throw new ApplicationDaoException("500", "User does not exist");
+        return null;
+//        throw new ApplicationDaoException("500", "User does not exist");
     }
 
     public List<User> searchUsers(String login) {

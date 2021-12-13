@@ -4,7 +4,12 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
+import java.beans.BeanProperty;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.sql.Date;
 import java.util.UUID;
 
 @Data
@@ -14,24 +19,24 @@ public class Reservation {
 
     @EqualsAndHashCode.Include
     private UUID id;
-    private Date startDate;
-    private Date endDate;
+    private Long startDate;
+    private Long endDate;
     private UUID userId;
     private UUID roomId;
 
-    public Reservation(UUID id, UUID userId, UUID roomId, Date startDate, Date endDate) {
+    public Reservation(UUID id, UUID userId, UUID roomId, Long startDate, Long endDate) {
         this(id, userId, roomId, startDate);
         this.endDate = endDate;
     }
 
-    public Reservation(UUID id, UUID userId, UUID roomId, Date startDate) {
+    public Reservation(UUID id, UUID userId, UUID roomId, Long startDate) {
         this(id, userId, roomId);
         this.startDate = startDate;
     }
 
     public Reservation(UUID id, UUID userId, UUID roomId) {
         this.id = id;
-        this.startDate = new Date();
+        this.startDate = System.currentTimeMillis();
         this.endDate = null;
         this.userId = userId;
         this.roomId = roomId;
@@ -41,35 +46,61 @@ public class Reservation {
         this.userId = UUID.fromString(userId);
     }
 
-    public void setRoomId(String roomId) {
-        this.roomId = UUID.fromString(roomId);
-    }
-
-
-    public UUID getUserId() {
-        return userId;
-    }
-
     public void setUserId(UUID userId) {
         this.userId = userId;
     }
 
-    public UUID getRoomId() {
-        return roomId;
+    public void setRoomId(String roomId) {
+        this.roomId = UUID.fromString(roomId);
     }
 
     public void setRoomId(UUID roomId) {
         this.roomId = roomId;
     }
 
-    public void setEndDate(Date endDate) {
-        if(this.startDate.after(endDate)) {
-            throw new RuntimeException();
-        }
-        this.endDate = endDate;
+    @JsonbTransient
+    public Date getActualStartDate() {
+        return new Date(startDate);
     }
 
+    @JsonbTransient
+    public Date getActualEndDate() {
+        return new Date(endDate);
+    }
+
+
+
+//    public void setEndDate(Date endDate) {
+//        if(this.startDate.after(endDate)) {
+//            throw new RuntimeException();
+//        }
+//        this.endDate = endDate;
+//    }
+
+    // nwm co zrobić, żeby te Depracted byłoy ignorowane przy beanach
+    @Deprecated
+    @JsonbTransient
+    public void setActive(boolean active) {
+        return;
+    }
+    @Deprecated
+    @JsonbTransient
+    public void setActualStartDate(String date) {
+        return;
+    }
+    @Deprecated
+    @JsonbTransient
+    public void setActualEndDate(String date) {
+        return;
+    }
+
+    @JsonbTransient
     public boolean isActive() {
-        return endDate == null;
+        if (this.endDate == 0) {
+            return true;
+        }
+
+        return this.startDate < this.endDate;
+//        return new Date(System.currentTimeMillis()).after(endDate);
     }
 }

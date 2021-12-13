@@ -33,7 +33,8 @@ public class UserEndpoint {
             createdUser = userManager.addUser(user);
         } catch (ApplicationDaoException | PermissionsException e) {
             //Jako basic jest 500
-            throw new WebApplicationException(e.getMessage());
+//            throw new WebApplicationException(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
 
         return Response.created(URI.create("/user/" + createdUser)).build();
