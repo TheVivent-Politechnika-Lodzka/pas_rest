@@ -253,5 +253,73 @@ class UserIT {
 
     }
 
+    @Test
+    public void negativeUpdateUser(){
+
+        // stwórz zasób klienta
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(BASE_URI);
+        User toRest = new User(UUID.randomUUID(),"update", "123","Jan", "Kowalski");
+        Response response =  target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        assertEquals(201, response.getStatus());
+
+        // pobierz utworzone id
+        String id = response.getLocation().toString();
+        id = id.substring(id.lastIndexOf("/")+1);
+
+        // pobierz zasób klienta
+        User fromRest = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(User.class);
+
+        // zmodyfikuj dane
+        fromRest.setLogin(null);
+        fromRest.setPassword(null);
+        fromRest.setName(null);
+        fromRest.setSurname(null);
+
+        // wysyłaj zmodyfikowane dane
+        response = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).post(Entity.json(fromRest));
+        assertEquals(200, response.getStatus());
+
+        // pobierz zasób klienta
+        User fromRestModified = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(User.class);
+        assertNotEquals(fromRest.getLogin(), fromRestModified.getLogin());
+        assertNotEquals(fromRest.getPassword(), fromRestModified.getPassword());
+        assertNotEquals(fromRest.getName(), fromRestModified.getName());
+        assertNotEquals(fromRest.getSurname(), fromRestModified.getSurname());
+
+        // sprawdz czy poprzednie dane pozostaly
+        assertEquals(toRest.getLogin(), fromRestModified.getLogin());
+        assertEquals(toRest.getPassword(), fromRestModified.getPassword());
+        assertEquals(toRest.getName(), fromRestModified.getName());
+        assertEquals(toRest.getSurname(), fromRestModified.getSurname());
+    }
+
+    @Test
+    public void negativeCreateUser() {
+
+        // stwórz zasób klienta
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(BASE_URI);
+        User toRest = new User(UUID.randomUUID(), "test", "123", "Jan", "Kowalski");
+        Response response = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        assertEquals(201, response.getStatus());
+
+        // pobierz utworzone id
+        String id = response.getLocation().toString();
+        id = id.substring(id.lastIndexOf("/") + 1);
+
+        // pobierz zasób klienta
+        User fromRest = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(User.class);
+        assertNotNull(fromRest);
+
+        // stworz drugi zasob
+        User toRest2 = new User(UUID.randomUUID(), "test", "523", "Olek", "Spring");
+        Response response2 = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        assertEquals(400, response2.getStatus());
+
+        // pobierz zasób klienta
+        User fromRest2 = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(User.class);
+        assertNotNull(fromRest2);
+    }
 
 }
