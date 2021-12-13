@@ -100,40 +100,23 @@ public class ReservationManager {
         return reservationDao.getAllReservations();
     }
 
-    private List<Reservation> searchingReservation(boolean active) {
-        List<Reservation> searching = new ArrayList<>();
-        if(active) {
-//            searching = getActualReservation();
-        } else {
-//            searching = getArchiveReservation();
-        }
-        return searching;
-    }
+    public List<Reservation> searchReservations(UUID cliendId, boolean includeArchived) {
+        List<Reservation> toReturn = new ArrayList<>();
 
-    public List<Reservation> giveReservations(UUID id, boolean client, boolean active) throws ApplicationDaoException {
-        List<Reservation> reservation = new ArrayList<>();
-
-        User user = new User();
-        HotelRoom room = new HotelRoom();
-        if (client && userDao.getActiveUsers().contains(userDao.getUserById(id))) {
-            user = userDao.getUserById(id);
-        } else if (!client && roomDao.getAllRooms().contains(roomDao.getRoomById(id))) {
-            room = roomDao.getRoomById(id);
-        }
-        for(Reservation res: searchingReservation(active)) {
-            if(client) {
-                if(res.getUserId().equals(user.getId())) {
-                    reservation.add(res);
-                }
-            } else {
-                if(res.getRoomId().equals(room.getId())) {
-                    reservation.add(res);
-                }
+        for (Reservation reservation : getActiveReservation()) {
+            if (reservation.getUserId().equals(cliendId)) {
+                toReturn.add(reservation);
             }
         }
-        return reservation;
+
+        if (!includeArchived) return toReturn;
+        for (Reservation reservation : getArchivedReservation()) {
+            if (reservation.getUserId().equals(cliendId)) {
+                toReturn.add(reservation);
+            }
+        }
+
+        return toReturn;
     }
-
-
 
 }

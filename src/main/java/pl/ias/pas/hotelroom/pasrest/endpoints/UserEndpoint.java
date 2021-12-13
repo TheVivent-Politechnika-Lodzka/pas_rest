@@ -85,22 +85,23 @@ public class UserEndpoint {
     @GET
     @Path("/search")
     @Produces("application/json")
-    public List<User> getUsersContainsLogin(@QueryParam("login") String login) {
+    public Response getUsersContainsLogin(@QueryParam("login") String login) {
         try {
-            return userManager.searchUsers(login);
+            return Response.ok(userManager.searchUsers(login)).build();
         } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
+
     }
 
     @GET
     @Path("/login/{login}")
     @Produces("application/json")
-    public User getUserByLogin(@PathParam("login") String login) {
+    public Response getUserByLogin(@PathParam("login") String login) {
         try {
-            return userManager.getUserByLogin(login);
+            return Response.ok(userManager.getUserByLogin(login)).build();
         } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
     }
 
