@@ -29,4 +29,6 @@ public class User {
         this.userType = UserType.CLIENT;
     }
 
+    // TODO ogarnąć equals i hashCode (najlepiej żeby lombok się tym zajął, ale uwzględniał tylko uuid)
+
 }

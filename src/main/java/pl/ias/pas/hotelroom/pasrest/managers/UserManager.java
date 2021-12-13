@@ -35,16 +35,42 @@ public class UserManager {
         return userDao.searchUsers(login);
     }
 
-    public List<User> giveArchiveUsers() {
-        return userDao.getArchiveUsers();
-    }
-
-    public List<User> giveAllUsers() {
+    public List<User> getAllUsers(){
         return userDao.getAllUsers();
     }
 
-    public User getUserById(UUID id) throws ApplicationDaoException {
-        return userDao.getUserById(id);
+    public List<User> getAllActiveUsers() {
+        return userDao.getActiveUsers();
+    }
+
+    public List<User> getAllArchivedUsers() {
+        return userDao.getArchivedUsers();
+    }
+
+//    public List<User> giveArchivedUsers() {
+//        return userDao.getArchivedUsers();
+//    }
+//
+//    public List<User> giveAllUsers() {
+//        return userDao.getAllUsers();
+//    }
+
+    public User getUserById(UUID id, boolean includeArchived){
+        for (User user : userDao.getActiveUsers()) {
+            if (user.getId().equals(id)) {
+                return user;
+            }
+        }
+
+        // jeśli nie ma użytkownika w bazie, to sprawdzamy czy może jest w archiwum
+        if (! includeArchived) return null;
+        for (User user : userDao.getArchivedUsers()) {
+            if (user.getId().equals(id)) {
+                return user;
+            }
+        }
+
+        return null;
     }
 
     public UUID addUser(User user) throws ApplicationDaoException, PermissionsException {
@@ -70,7 +96,7 @@ public class UserManager {
 
         // sprawdzanie unikalności loginu i id
         UUID id = UUID.randomUUID();
-        for (User currentUser : giveAllUsers()) {
+        for (User currentUser : getAllUsers()) {
             if (currentUser.getLogin().equals(user.getLogin())) {
                 throw new ApplicationDaoException("500", "User already exists");
             }
@@ -108,9 +134,9 @@ public class UserManager {
             throw new ApplicationDaoException("500", "User does not exist");
         }
 
-        if (userDao.getAllUsers().contains(userDao.getUserByLogin(user.getLogin()))) {
-            throw new ApplicationDaoException("500", "Room with this number already exist");
-        }
+//        if (userDao.getAllUsers().contains(userDao.getUserByLogin(user.getLogin()))) {
+//            throw new ApplicationDaoException("500", "User already exists");
+//        }
 
         userDao.updateUser(old, user);
     }

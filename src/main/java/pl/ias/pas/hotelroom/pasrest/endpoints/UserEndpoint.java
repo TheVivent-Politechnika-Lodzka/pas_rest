@@ -35,6 +35,7 @@ public class UserEndpoint {
             //Jako basic jest 500
             throw new WebApplicationException(e.getMessage());
         }
+
         return Response.created(URI.create("/user/" + createdUser)).build();
     }
 
@@ -42,36 +43,42 @@ public class UserEndpoint {
     @POST
     @Path("/{id}")
     @Consumes("application/json")
-    public void updateUser(@PathParam("id") String id, User user) {
+    public Response updateUser(@PathParam("id") String id, User user) {
         try {
-            userManager.updateUser(userManager.getUserById(UUID.fromString(id)), user);
+            User oldUser = userManager.getUserById(UUID.fromString(id), false);
+            userManager.updateUser(oldUser, user);
         } catch (ApplicationDaoException | PermissionsException e) {
-            throw new WebApplicationException(e.getMessage());
+//            throw new WebApplicationException(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
+        return Response.ok().build();
     }
 
     //DELETE\\
     @DELETE
     @Path("/{id}")
     @Consumes("application/json")
-    public void archiveUser(@PathParam("id") String id) {
+    public Response archiveUser(@PathParam("id") String id) {
         try {
             userManager.removeUser(UUID.fromString(id));
         } catch (ApplicationDaoException | PermissionsException e) {
-            throw new WebApplicationException(e.getMessage());
+            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
         }
+        return Response.ok().build();
     }
 
     //READ\\
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public User getUserById(@PathParam("id") String id) {
-        try {
-            return userManager.getUserById(UUID.fromString(id));
-        } catch (ApplicationDaoException e) {
-            throw new WebApplicationException(e.getMessage());
-        }
+    public Response getUserById(@PathParam("id") String id) {
+            User user = userManager.getUserById(UUID.fromString(id), false);
+
+            if (user == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+            }
+
+            return Response.ok(user).build();
     }
 
     @GET
@@ -96,18 +103,28 @@ public class UserEndpoint {
         }
     }
 
+
     @GET
     @Path("/all")
     @Produces("application/json")
-    public List<User> getAllUsers() {
-        return userManager.giveAllUsers();
+    public Response getAllUsers(@QueryParam("scope") String scope) {
+        if (scope == null) scope = "active";
+        List<User> toReturn;
+        switch (scope) {
+            case "active":
+                toReturn = userManager.getAllActiveUsers();
+                break;
+            case "archived":
+                toReturn = userManager.getAllArchivedUsers();
+                break;
+            case "all":
+                toReturn = userManager.getAllUsers();
+                break;
+            default:
+                return Response.status(Response.Status.BAD_REQUEST).entity("Wrong scope").build();
+        }
+
+        return Response.ok(toReturn).build();
     }
 
-    //ARCHIVE\\
-    @GET
-    @Path("/archive")
-    @Produces("application/json")
-    public List<User> getAllArchiveUsers() {
-        return userManager.giveArchiveUsers();
-    }
 }

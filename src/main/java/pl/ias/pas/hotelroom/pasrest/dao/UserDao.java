@@ -10,7 +10,7 @@ import java.util.*;
 public class UserDao {
 
     private List<User> usersRepository = Collections.synchronizedList(new ArrayList<>());
-    private List<User> archiveRepository = Collections.synchronizedList(new ArrayList<>());
+//    private List<User> archiveRepository = Collections.synchronizedList(new ArrayList<>());
 
     public UUID addUser(User user) {
         usersRepository.add(user);
@@ -32,9 +32,8 @@ public class UserDao {
         }
     }
 
-    public void removeUser(User user) {
-        archiveRepository.add(user);
-        usersRepository.remove(user);
+    public void removeUser(User user) throws ApplicationDaoException {
+        getUserById(user.getId()).setActive(false);
     }
 
     public User getUserById(UUID id) throws ApplicationDaoException {
@@ -67,18 +66,28 @@ public class UserDao {
         return result;
     }
 
-    public List<User> getActiveUsers() {
+    public List<User> getAllUsers() {
         return usersRepository;
     }
 
-    public List<User> getArchiveUsers() {
-        return archiveRepository;
+    public List<User> getActiveUsers(){
+        ArrayList<User> result = new ArrayList<>();
+        for (User user : usersRepository) {
+            if(user.isActive()) {
+                result.add(user);
+            }
+        }
+        return result;
     }
 
-    public List<User> getAllUsers() {
-        List<User> allUsers = new ArrayList<>(getActiveUsers());
-        allUsers.addAll(getArchiveUsers());
-        return allUsers;
+    public List<User> getArchivedUsers(){
+        ArrayList<User> result = new ArrayList<>();
+        for (User user : usersRepository) {
+            if(!user.isActive()) {
+                result.add(user);
+            }
+        }
+        return result;
     }
 
 }
