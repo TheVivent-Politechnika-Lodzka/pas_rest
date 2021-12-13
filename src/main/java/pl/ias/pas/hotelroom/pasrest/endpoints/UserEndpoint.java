@@ -73,13 +73,13 @@ public class UserEndpoint {
     @Path("/{id}")
     @Produces("application/json")
     public Response getUserById(@PathParam("id") String id) {
-            User user = userManager.getUserById(UUID.fromString(id), false);
+        User user = userManager.getUserById(UUID.fromString(id), false);
 
-            if (user == null) {
-                return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-            }
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
+        }
 
-            return Response.ok(user).build();
+        return Response.ok(user).build();
     }
 
     @GET
