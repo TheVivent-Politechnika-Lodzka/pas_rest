@@ -199,5 +199,59 @@ class UserIT {
 
     }
 
+    @Test
+    public void getAllUsers(){
+        // stwórz zasób klienta
+        Client client = ClientBuilder.newClient();
+        WebTarget target = client.target(BASE_URI);
+        User toRest = new User(UUID.randomUUID(),"all1", "123","Jan", "Kowalski");
+        target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        toRest.setLogin("all2");
+        target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        toRest.setLogin("all3");
+
+        Response response = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
+        String id = response.getLocation().toString();
+        id = id.substring(id.lastIndexOf("/")+1);
+        target.path("api").path("user").path("{id}").resolveTemplate("id", id).request().delete();
+
+        List<User> allUsers = target.path("api").path("user").path("all")
+                .queryParam("scope", "all")
+                .request(MediaType.APPLICATION_JSON)
+                .get(new GenericType<List<User>>(){});
+        assertTrue(allUsers.size() >= 3);
+
+
+        int activeUsers = 0;
+        int archivedUsers = 0;
+        boolean all1Present = false;
+        boolean all2Present = false;
+        boolean all3Present = false;
+        for (User user : allUsers) {
+            if (user.isActive()) {
+                activeUsers++;
+                if (user.getLogin().equals("all1")) {
+                    all1Present = true;
+                }
+                if (user.getLogin().equals("all2")) {
+                    all2Present = true;
+                }
+            }
+            else {
+                archivedUsers++;
+                if (user.getLogin().equals("all3")) {
+                    all3Present = true;
+                }
+            }
+        }
+
+        assertTrue(activeUsers >= 2);
+        assertTrue(archivedUsers >= 1);
+        assertTrue(all1Present);
+        assertTrue(all2Present);
+        assertTrue(all3Present);
+
+    }
+
 
 }

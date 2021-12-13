@@ -1,15 +1,18 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 public class Reservation {
 
+    @EqualsAndHashCode.Include
     private UUID id;
     private Date startDate;
     private Date endDate;

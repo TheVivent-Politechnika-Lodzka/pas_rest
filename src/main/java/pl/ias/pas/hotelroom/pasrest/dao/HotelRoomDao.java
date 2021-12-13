@@ -48,13 +48,13 @@ public class HotelRoomDao {
         throw new ApplicationDaoException("500", "Room doesn't exist");
     }
 
-    public HotelRoom getRoomByNumber(int number) throws ApplicationDaoException {
+    public HotelRoom getRoomByNumber(int number) {
         for (HotelRoom room : roomsRepository) {
             if (room.getRoomNumber() == number) {
                 return room;
             }
         }
-        throw new ApplicationDaoException("500", "Room doesn't exist");
+        return null;
     }
 
     public List<HotelRoom> getAllRooms() {

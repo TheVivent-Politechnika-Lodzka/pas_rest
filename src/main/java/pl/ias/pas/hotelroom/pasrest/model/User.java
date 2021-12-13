@@ -1,15 +1,18 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 import java.util.UUID;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 public class User {
 
+    @EqualsAndHashCode.Include
     private UUID id;
     private String login;
     private String password;

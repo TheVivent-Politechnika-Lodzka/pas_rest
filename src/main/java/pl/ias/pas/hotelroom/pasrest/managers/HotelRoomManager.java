@@ -29,11 +29,11 @@ public class HotelRoomManager {
         return roomDao.getRoomById(id);
     }
 
-    public UUID addRoom(HotelRoom room) throws ApplicationDaoException, PermissionsException {
+    public UUID addRoom(HotelRoom room) throws ApplicationDaoException {
         UUID id = UUID.randomUUID();
 
         // sprawdzanie unikalności numeru
-        if(roomDao.getAllRooms().contains(roomDao.getRoomByNumber(room.getRoomNumber()))) {
+        if (roomDao.getRoomByNumber(room.getRoomNumber()) != null) {
             throw new ApplicationDaoException("500", "Room already exists");
         }
 
