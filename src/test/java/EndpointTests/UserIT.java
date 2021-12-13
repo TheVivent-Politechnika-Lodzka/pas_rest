@@ -7,6 +7,7 @@ import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.List;
@@ -143,15 +144,19 @@ class UserIT {
         toRest.setLogin("active3");
         target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
 
-        List defaultReturn = target.path("api").path("user").path("all").request(MediaType.APPLICATION_JSON).get(List.class);
+        List<User> defaultReturn = target.path("api").path("user").path("all")
+                .request(MediaType.APPLICATION_JSON)
+                .get(new GenericType<List<User>>(){});
         assertTrue(defaultReturn.size() >= 3);
 
-
-        for (Object o : defaultReturn) {
-            assertTrue(Boolean.parseBoolean(o.toString().substring(8, 12)));
+        for (User user : defaultReturn) {
+            assertTrue(user.isActive());
         }
 
-        List scopedReturn = target.path("api").path("user").path("all").queryParam("scope", "active").request(MediaType.APPLICATION_JSON).get(List.class);
+        List<User> scopedReturn = target.path("api").path("user").path("all")
+                .queryParam("scope", "active")
+                .request(MediaType.APPLICATION_JSON)
+                .get(new GenericType<List<User>>(){});
         assertTrue(scopedReturn.size() >= 3);
 
         // zwrócone listy powinny być identyczne
@@ -182,11 +187,14 @@ class UserIT {
         id = id.substring(id.lastIndexOf("/")+1);
         target.path("api").path("user").path("{id}").resolveTemplate("id", id).request().delete();
 
-        List deletedUsers = target.path("api").path("user").path("all").queryParam("scope", "archived").request(MediaType.APPLICATION_JSON).get(List.class);
+        List<User> deletedUsers = target.path("api").path("user").path("all")
+                .queryParam("scope", "archived")
+                .request(MediaType.APPLICATION_JSON)
+                .get(new GenericType<List<User>>(){});
         assertTrue(deletedUsers.size() >= 3);
 
-        for (Object o : deletedUsers) {
-            assertFalse(Boolean.parseBoolean(o.toString().substring(8, 13)));
+        for (User user : deletedUsers) {
+            assertFalse(user.isActive());
         }
 
     }
