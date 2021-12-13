@@ -1,17 +1,14 @@
 package EndpointTests;
 
-import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
-import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
