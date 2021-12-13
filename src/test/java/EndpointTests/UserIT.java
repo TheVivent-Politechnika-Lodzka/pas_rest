@@ -1,14 +1,17 @@
 package EndpointTests;
 
+import com.google.gson.Gson;
 import org.junit.jupiter.api.Test;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
+import javax.json.JsonObject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -143,15 +146,15 @@ class UserIT {
         toRest.setLogin("active3");
         target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
 
-        List<User> defaultReturn = target.path("api").path("user").path("all").request(MediaType.APPLICATION_JSON).get(List.class);
+        List defaultReturn = target.path("api").path("user").path("all").request(MediaType.APPLICATION_JSON).get(List.class);
         assertTrue(defaultReturn.size() >= 3);
 
-        // TODO chyba nie rzutuje Userów dobrze. Do naprawy
-        for(User user : defaultReturn){
-            assertEquals(true, user.isActive());
+
+        for (Object o : defaultReturn) {
+            assertTrue(Boolean.parseBoolean(o.toString().substring(8, 12)));
         }
 
-        List<User> scopedReturn = target.path("api").path("user").path("all").queryParam("scope", "active").request(MediaType.APPLICATION_JSON).get(List.class);
+        List scopedReturn = target.path("api").path("user").path("all").queryParam("scope", "active").request(MediaType.APPLICATION_JSON).get(List.class);
         assertTrue(scopedReturn.size() >= 3);
 
         // zwrócone listy powinny być identyczne
@@ -182,12 +185,11 @@ class UserIT {
         id = id.substring(id.lastIndexOf("/")+1);
         target.path("api").path("user").path("{id}").resolveTemplate("id", id).request().delete();
 
-        List<User> deletedUsers = target.path("api").path("user").path("all").queryParam("scope", "archived").request(MediaType.APPLICATION_JSON).get(List.class);
+        List deletedUsers = target.path("api").path("user").path("all").queryParam("scope", "archived").request(MediaType.APPLICATION_JSON).get(List.class);
         assertTrue(deletedUsers.size() >= 3);
 
-        // TODO chyba nie rzutuje Userów dobrze. Do naprawy
-        for (User user : deletedUsers) {
-            assertEquals(false, user.isActive());
+        for (Object o : deletedUsers) {
+            assertFalse(Boolean.parseBoolean(o.toString().substring(8, 13)));
         }
 
     }
