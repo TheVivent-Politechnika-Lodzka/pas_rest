@@ -51,6 +51,16 @@ public class ReservationIT {
         assertEquals(reservation.getRoomId(), reservationFromRest.getRoomId());
         assertEquals(reservation.getUserId(), reservationFromRest.getUserId());
 
+        user = new User(UUID.randomUUID(), "inget2", "password", "name", "surname");
+        response = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(user));
+        userId = response.getLocation().toString();
+        userId = userId.substring(userId.lastIndexOf("/") + 1);
+
+        reservation = new Reservation(UUID.randomUUID(), UUID.fromString(userId), UUID.fromString(roomId), yesterday, tomorrow);
+
+        response = target.path("api").path("reservation").request(MediaType.APPLICATION_JSON).post(Entity.json(reservation));
+        assertEquals(400, response.getStatus());
+
     }
 
 }
