@@ -1,7 +1,9 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAlreadyExistException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 import pl.ias.pas.hotelroom.pasrest.managers.UserManager;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
@@ -31,10 +33,12 @@ public class UserEndpoint {
         UUID createdUser;
         try {
             createdUser = userManager.addUser(user);
-        } catch (ApplicationDaoException | PermissionsException e) {
-            //Jako basic jest 500
-//            throw new WebApplicationException(e.getMessage());
+        }catch (ValidationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceAlreadyExistException e) {
+            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
+        } catch (IDontKnowException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
 
         return Response.created(URI.create("/user/" + createdUser)).build();
@@ -46,11 +50,23 @@ public class UserEndpoint {
     @Consumes("application/json")
     public Response updateUser(@PathParam("id") String id, User user) {
         try {
-            User oldUser = userManager.getUserById(UUID.fromString(id), false);
+            UUID oldUser = UUID.fromString(id);
             userManager.updateUser(oldUser, user);
-        } catch (ApplicationDaoException | PermissionsException e) {
-//            throw new WebApplicationException(e.getMessage());
+        } catch (ValidationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        }
+        return Response.ok().build();
+    }
+
+    @HEAD
+    @Path("/activate/{id}")
+    public Response activateUser(@PathParam("id") String id) {
+        try {
+            userManager.activateUser(UUID.fromString(id));
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
         return Response.ok().build();
     }
@@ -62,8 +78,8 @@ public class UserEndpoint {
     public Response archiveUser(@PathParam("id") String id) {
         try {
             userManager.removeUser(UUID.fromString(id));
-        } catch (ApplicationDaoException | PermissionsException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
         return Response.ok().build();
     }
@@ -86,11 +102,7 @@ public class UserEndpoint {
     @Path("/search")
     @Produces("application/json")
     public Response getUsersContainsLogin(@QueryParam("login") String login) {
-        try {
-            return Response.ok(userManager.searchUsers(login)).build();
-        } catch (ApplicationDaoException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+        return Response.ok(userManager.searchUsers(login)).build();
 
     }
 
@@ -98,11 +110,13 @@ public class UserEndpoint {
     @Path("/login/{login}")
     @Produces("application/json")
     public Response getUserByLogin(@PathParam("login") String login) {
-        try {
-            return Response.ok(userManager.getUserByLogin(login)).build();
-        } catch (ApplicationDaoException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        User user = userManager.getUserByLogin(login);
+
+        if (user == null) {
+            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
         }
+        return Response.ok(user).build();
+
     }
 
 

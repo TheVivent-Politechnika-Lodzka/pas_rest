@@ -3,16 +3,17 @@ package pl.ias.pas.hotelroom.pasrest.managers;
 import pl.ias.pas.hotelroom.pasrest.dao.HotelRoomDao;
 import pl.ias.pas.hotelroom.pasrest.dao.ReservationDao;
 import pl.ias.pas.hotelroom.pasrest.dao.UserDao;
-import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAllocated;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import javax.naming.spi.ResolveResult;
 import java.util.ArrayList;
-import java.sql.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,11 +28,11 @@ public class ReservationManager {
     @Inject
     private HotelRoomDao roomDao;
 
-    public Reservation getReservationById(UUID id) throws ApplicationDaoException {
+    public Reservation getReservationById(UUID id) {
         return reservationDao.getReservationById(id);
     }
 
-    public UUID addReservation(Reservation reservation) throws ApplicationDaoException {
+    public UUID addReservation(Reservation reservation) throws ResourceNotFoundException, ResourceAllocated, ValidationException {
 
         UUID id = UUID.randomUUID();
         Reservation newReservation;
@@ -39,15 +40,19 @@ public class ReservationManager {
         HotelRoom room = roomDao.getRoomById(reservation.getRoomId());
 
         //sprawdzenie czy klient i pokoj istnieja
-        if(user == null || room == null) {
-            throw new ApplicationDaoException("500", "User or room doesn't exist");
+        if (user == null) {
+            throw new ResourceNotFoundException("User does not exist");
+        }
+        if (room == null) {
+            throw new ResourceNotFoundException("Room does not exist");
         }
 
         //sprawdzenie czy nie jest juz przypadkiem wynajmowany
         if(room.isAllocated()) {
-            throw new ApplicationDaoException("500", "Room is already occupied");
+            throw new ResourceAllocated("Room is already occupied");
         }
 
+        reservation.validate();
         room.setAllocated(true);
         newReservation = new Reservation(id, user.getId(), room.getId());
 
@@ -64,25 +69,27 @@ public class ReservationManager {
         return reservationDao.addReservation(newReservation);
     }
 
-    public void archiveReservation(UUID id) throws ApplicationDaoException {
+    public void archiveReservation(UUID id) throws ResourceNotFoundException, IDontKnowException {
 
         if (reservationDao.getReservationById(id) == null) {
-            throw new ApplicationDaoException("500", "Reservation does not exist");
+            throw new ResourceNotFoundException("Reservation does not exist");
         }
 
         reservationDao.endReservation(id);
-//        if (!removedReservation) {
-//            throw new ApplicationDaoException("500", "Reservation could not be removed, please try again");
-//        }
-//
-//        roomDao.getRoomById(reservation.getRoomId()).setAllocated(false);
-//        reservationDao.endReservation(reservation);
     }
 
-    public void updateReservation(Reservation old, Reservation reservation) throws ApplicationDaoException {
-        if (!getAllReservations().contains(old)) {
-            throw new ApplicationDaoException("500", "Reservation does not exist");
+    public void updateReservation(Reservation old, Reservation reservation) throws ResourceNotFoundException {
+        if (reservationDao.getReservationById(old.getId()) == null) {
+            throw new ResourceNotFoundException("Reservation does not exist");
         }
+
+        if (reservation.getUserId() != null)
+            if (userDao.getUserById(reservation.getUserId()) == null)
+                throw new ResourceNotFoundException("User does not exist");
+
+        if (reservation.getRoomId() != null)
+            if (roomDao.getRoomById(reservation.getRoomId()) == null)
+                throw new ResourceNotFoundException("Room does not exist");
 
         reservationDao.updateReservation(old, reservation);
     }

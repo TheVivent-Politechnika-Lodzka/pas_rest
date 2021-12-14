@@ -1,7 +1,9 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.PermissionsException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAllocated;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAlreadyExistException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 import pl.ias.pas.hotelroom.pasrest.managers.HotelRoomManager;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 
@@ -10,7 +12,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RequestScoped
@@ -30,8 +31,10 @@ public class HotelRoomEndpoint {
         UUID createdRoom;
         try {
             createdRoom = roomManager.addRoom(room);
-        } catch (ApplicationDaoException e) {
+        } catch (ValidationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceAlreadyExistException e) {
+            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
         }
         return Response.created(URI.create("/room/" + createdRoom)).build();
     }
@@ -43,8 +46,12 @@ public class HotelRoomEndpoint {
     public Response updateRoom(@PathParam("id") String id, HotelRoom room) {
         try {
             roomManager.updateRoom(roomManager.getRoomById(UUID.fromString(id)), room);
-        } catch (ApplicationDaoException e) {
+        } catch (ValidationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (ResourceAllocated resourceAllocated) {
+            return Response.status(Response.Status.CONFLICT).entity(resourceAllocated.getMessage()).build();
         }
         return Response.ok().build();
     }
@@ -55,8 +62,10 @@ public class HotelRoomEndpoint {
     public Response removeRoom(@PathParam("id") String id) {
         try {
             roomManager.removeRoom(UUID.fromString(id));
-        } catch (ApplicationDaoException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (ResourceAllocated resourceAllocated) {
+            return Response.status(Response.Status.CONFLICT).entity(resourceAllocated.getMessage()).build();
         }
         return Response.ok().build();
     }
@@ -79,12 +88,12 @@ public class HotelRoomEndpoint {
     @Path("/number/{number}")
     @Produces("application/json")
     public Response getRoomByNumber(@PathParam("number") int number) {
-        HotelRoom room;
-        try {
-            room = roomManager.getRoomByNumber(number);
-        } catch (ApplicationDaoException e) {
+        HotelRoom room = roomManager.getRoomByNumber(number);
+
+        if (room == null) {
             return Response.status(Response.Status.NOT_FOUND).entity("Room not found").build();
         }
+
         return Response.ok(room).build();
     }
 

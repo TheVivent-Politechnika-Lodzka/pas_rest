@@ -1,6 +1,9 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAllocated;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 import pl.ias.pas.hotelroom.pasrest.managers.ReservationManager;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 
@@ -9,7 +12,6 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
-import java.util.List;
 import java.util.UUID;
 
 @RequestScoped
@@ -32,9 +34,12 @@ public class ReservationEndpoint {
         UUID createdReservation;
         try {
             createdReservation = reservationManager.addReservation(reservation);
-        } catch (ApplicationDaoException e) {
-//            throw new WebApplicationException(e.getMessage());
+        } catch (ValidationException e) {
             return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (ResourceAllocated resourceAllocated) {
+            return Response.status(Response.Status.CONFLICT).entity(resourceAllocated.getMessage()).build();
         }
 
         return Response.created(URI.create("/reservation/" + createdReservation)).build();
@@ -49,8 +54,8 @@ public class ReservationEndpoint {
             Reservation oldReservation = reservationManager.getReservationById(UUID.fromString(id));
             reservationManager.updateReservation(oldReservation, reservation);
             return Response.ok().build();
-        } catch (ApplicationDaoException e) {
-            return  Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
         }
     }
 
@@ -61,7 +66,9 @@ public class ReservationEndpoint {
         try {
             reservationManager.archiveReservation(UUID.fromString(id));
             return Response.ok().build();
-        } catch (ApplicationDaoException e) {
+        } catch (ResourceNotFoundException e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
+        } catch (IDontKnowException e) {
             return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
         }
     }
@@ -71,12 +78,14 @@ public class ReservationEndpoint {
     @Path("/{id}")
     @Produces("application/json")
     public Response getReservationById(@PathParam("id") String id) {
-        try {
-            return Response.ok(reservationManager.getReservationById(UUID.fromString(id))).build();
+        Reservation reservation = reservationManager.getReservationById(UUID.fromString(id));
 
-        } catch (ApplicationDaoException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+        if(reservation == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
         }
+
+        return Response.ok(reservation).build();
+
     }
 
     @GET

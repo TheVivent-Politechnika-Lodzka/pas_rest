@@ -1,6 +1,5 @@
 package pl.ias.pas.hotelroom.pasrest.dao;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -32,28 +31,26 @@ public class UserDao {
         }
     }
 
-    public void removeUser(User user) throws ApplicationDaoException {
+    public void removeUser(User user) {
         getUserById(user.getId()).setActive(false);
     }
 
-    public User getUserById(UUID id) throws ApplicationDaoException {
+    public User getUserById(UUID id) {
         for (User user : usersRepository) {
             if (user.getId().equals(id)) {
                 return user;
             }
         }
         return null;
-//        throw new ApplicationDaoException("500", "User does not exist");
     }
 
-    public User getUserByLogin(String login) throws ApplicationDaoException {
+    public User getUserByLogin(String login) {
         for (User user : usersRepository) {
             if (user.getLogin().equals(login)) {
                 return user;
             }
         }
         return null;
-//        throw new ApplicationDaoException("500", "User does not exist");
     }
 
     public List<User> searchUsers(String login) {
@@ -92,4 +89,8 @@ public class UserDao {
         return result;
     }
 
+
+    public void activateUser(UUID id) {
+        getUserById(id).setActive(true);
+    }
 }

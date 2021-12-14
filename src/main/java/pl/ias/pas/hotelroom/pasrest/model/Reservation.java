@@ -3,6 +3,7 @@ package pl.ias.pas.hotelroom.pasrest.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
@@ -93,14 +94,19 @@ public class Reservation {
     public void setActualEndDate(String date) {
         return;
     }
-
     @JsonbTransient
     public boolean isActive() {
         if (this.endDate == 0) {
             return true;
         }
-
         return this.startDate < this.endDate;
-//        return new Date(System.currentTimeMillis()).after(endDate);
     }
+
+    public void validate() throws ValidationException {
+        if (endDate == 0) return;
+        if (startDate > endDate) {
+            throw new ValidationException("End date cannot be before start date");
+        }
+    }
+
 }

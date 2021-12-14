@@ -29,7 +29,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"login", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"login", "123123123","Jan", "Kowalski");
         Response response =  target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         assertEquals(201, response.getStatus());
 
@@ -54,7 +54,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"login2", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"login2", "123123123","Jan", "Kowalski");
         Response response =  target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         assertEquals(201, response.getStatus());
 
@@ -73,7 +73,7 @@ class UserIT {
 
         // zmodyfikuj dane
         fromRest.setLogin("login2");
-        fromRest.setPassword("123");
+        fromRest.setPassword("123321321");
         fromRest.setName("Janusz");
         fromRest.setSurname("Kowalski");
 
@@ -95,7 +95,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"login3", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"login3", "123123123","Jan", "Kowalski");
         Response response =  target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         assertEquals(201, response.getStatus());
 
@@ -117,7 +117,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"login4", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"login4", "123123123","Jan", "Kowalski");
         Response response =  target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         assertEquals(201, response.getStatus());
 
@@ -137,7 +137,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"active1", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"active1", "123123123","Jan", "Kowalski");
         target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         toRest.setLogin("active2");
         target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
@@ -168,7 +168,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"arhived1", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"arhived1", "123123123","Jan", "Kowalski");
 
         Response response = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         String id = response.getLocation().toString();
@@ -204,7 +204,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"all1", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"all1", "123123123","Jan", "Kowalski");
         target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         toRest.setLogin("all2");
         target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
@@ -259,7 +259,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(),"update", "123","Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(),"update", "123123123","Jan", "Kowalski");
         Response response =  target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         assertEquals(201, response.getStatus());
 
@@ -272,13 +272,13 @@ class UserIT {
 
         // zmodyfikuj dane
         fromRest.setLogin(null);
-        fromRest.setPassword(null);
+        fromRest.setPassword("null");
         fromRest.setName(null);
         fromRest.setSurname(null);
 
         // wysyłaj zmodyfikowane dane
         response = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).post(Entity.json(fromRest));
-        assertEquals(200, response.getStatus());
+        assertEquals(400, response.getStatus());
 
         // pobierz zasób klienta
         User fromRestModified = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(User.class);
@@ -300,7 +300,7 @@ class UserIT {
         // stwórz zasób klienta
         Client client = ClientBuilder.newClient();
         WebTarget target = client.target(BASE_URI);
-        User toRest = new User(UUID.randomUUID(), "test", "123", "Jan", "Kowalski");
+        User toRest = new User(UUID.randomUUID(), "test", "123123123", "Jan", "Kowalski");
         Response response = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
         assertEquals(201, response.getStatus());
 
@@ -313,9 +313,9 @@ class UserIT {
         assertNotNull(fromRest);
 
         // stworz drugi zasob
-        User toRest2 = new User(UUID.randomUUID(), "test", "523", "Olek", "Spring");
+        User toRest2 = new User(UUID.randomUUID(), "test", "523123123", "Olek", "Spring");
         Response response2 = target.path("api").path("user").request(MediaType.APPLICATION_JSON).post(Entity.json(toRest));
-        assertEquals(400, response2.getStatus());
+        assertEquals(409, response2.getStatus());
 
         // pobierz zasób klienta
         User fromRest2 = target.path("api").path("user").path("{id}").resolveTemplate("id", id).request(MediaType.APPLICATION_JSON).get(User.class);

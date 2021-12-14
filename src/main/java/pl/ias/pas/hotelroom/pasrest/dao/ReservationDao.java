@@ -1,6 +1,6 @@
 package pl.ias.pas.hotelroom.pasrest.dao;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.ApplicationDaoException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -46,12 +46,10 @@ public class ReservationDao {
         }
     }
 
-    public void endReservation(UUID reservationId) throws ApplicationDaoException {
+    public void endReservation(UUID reservationId) throws IDontKnowException {
         Reservation res = getReservationById(reservationId);
-        if (res == null)
-            throw new ApplicationDaoException("500", "Reservation with id " + reservationId + " not found");
         if (res.getEndDate() == 0 && new Date(System.currentTimeMillis()).after(res.getActualEndDate()))
-            throw new ApplicationDaoException("500", "Reservation with id " + reservationId + " already ended");
+            throw new IDontKnowException("Reservation with id " + reservationId + " already ended");
         res.setEndDate(System.currentTimeMillis());
 
     }

@@ -3,6 +3,7 @@ package pl.ias.pas.hotelroom.pasrest.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -18,7 +19,7 @@ public class User {
     private String password;
     private String name;
     private String surname;
-    private UserType userType;
+    private UserType userType = UserType.CLIENT;
     private boolean isActive = true;
 
     // nadawanie id to odpowiedzialność repozytorium
@@ -32,6 +33,37 @@ public class User {
         this.userType = UserType.CLIENT;
     }
 
-    // TODO ogarnąć equals i hashCode (najlepiej żeby lombok się tym zajął, ale uwzględniał tylko uuid)
+    public void validateLogin() throws ValidationException {
+        if(login.length() < 3 || login.length() > 20)
+            throw new ValidationException("Login must be between 3 and 20 characters");
+    }
+
+    public void validatePassword() throws ValidationException {
+        if(password.length() < 8 || password.length() > 20)
+            throw new ValidationException("Password must be between 8 and 20 characters");
+    }
+
+    public void validateName() throws ValidationException {
+        if(name.length() < 1 )
+            throw new ValidationException("Name must be minimum 1 character");
+    }
+
+    public void validateSurname() throws ValidationException {
+        if(surname.length() < 1 )
+            throw new ValidationException("Surname must be minimum 1 character");
+    }
+
+    public void validateUserType() throws ValidationException {
+        if(userType == null)
+            throw new ValidationException("User type must be set");
+    }
+
+    public void validate() throws ValidationException {
+        validateLogin();
+        validatePassword();
+        validateName();
+        validateSurname();
+        validateUserType();
+    }
 
 }

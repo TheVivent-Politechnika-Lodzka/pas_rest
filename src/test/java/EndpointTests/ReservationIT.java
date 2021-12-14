@@ -30,7 +30,7 @@ public class ReservationIT {
         String userId = response.getLocation().toString();
         userId = userId.substring(userId.lastIndexOf("/") + 1);
 
-        HotelRoom room = new HotelRoom(UUID.randomUUID(), 10, 20, 30, "");
+        HotelRoom room = new HotelRoom(UUID.randomUUID(), 10, 20, 30, "description cannot be empty");
         response = target.path("api").path("room").request(MediaType.APPLICATION_JSON).post(Entity.json(room));
         String roomId = response.getLocation().toString();
         roomId = roomId.substring(roomId.lastIndexOf("/") + 1);
@@ -59,7 +59,7 @@ public class ReservationIT {
         reservation = new Reservation(UUID.randomUUID(), UUID.fromString(userId), UUID.fromString(roomId), yesterday, tomorrow);
 
         response = target.path("api").path("reservation").request(MediaType.APPLICATION_JSON).post(Entity.json(reservation));
-        assertEquals(400, response.getStatus());
+        assertEquals(409, response.getStatus());
 
     }
 
