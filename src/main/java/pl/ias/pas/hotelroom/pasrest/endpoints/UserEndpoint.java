@@ -1,14 +1,14 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAlreadyExistException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceNotFoundException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
 import pl.ias.pas.hotelroom.pasrest.managers.UserManager;
+import pl.ias.pas.hotelroom.pasrest.model.Client;
+import pl.ias.pas.hotelroom.pasrest.model.ResourceAdmin;
 import pl.ias.pas.hotelroom.pasrest.model.User;
+import pl.ias.pas.hotelroom.pasrest.model.UserAdmin;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 import java.net.URI;
@@ -26,105 +26,110 @@ public class UserEndpoint {
     // przykładowe zapytanie tworzące nowego użytkownika
     // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/user login=test password=test name=test surname=test
 
-    //CREATE\\
+    @GET
+    @Path("/hello")
+    public String test() {
+        System.out.println("########################");
+        System.out.println("hello");
+        System.out.println("########################");
+        return "Hello";
+    }
+
+    // CREATE [POST -> 201]
     @POST
+    @Path("/create")
     @Consumes("application/json")
-    public Response createUser(User user) {
-        UUID createdUser;
-        try {
-            createdUser = userManager.addUser(user);
-        }catch (ValidationException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        } catch (ResourceAlreadyExistException e) {
-            return Response.status(Response.Status.CONFLICT).entity(e.getMessage()).build();
-        } catch (IDontKnowException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
-        }
+    public Response createUser(@Valid Client user) {
+        UUID createdUser = userManager.addUser(user);
 
         return Response.created(URI.create("/user/" + createdUser)).build();
     }
 
-    //UPDATE\\
+    // CREATE [POST -> 201]
+    @POST
+    @Path("/createUserAdmin")
+    @Consumes("application/json")
+    public Response createUser(@Valid UserAdmin user) {
+        UUID createdUser = userManager.addUser(user);
+
+        return Response.created(URI.create("/user/" + createdUser)).build();
+    }
+
+    // CREATE [POST -> 201]
+    @POST
+    @Path("/createResourceAdmin")
+    @Consumes("application/json")
+    public Response createUser(@Valid ResourceAdmin user) {
+        UUID createdUser = userManager.addUser(user);
+
+        return Response.created(URI.create("/user/" + createdUser)).build();
+    }
+
+
+    // UPDATE [POST -> 200]
     @POST
     @Path("/{id}")
     @Consumes("application/json")
-    public Response updateUser(@PathParam("id") String id, User user) {
-        try {
-            UUID oldUser = UUID.fromString(id);
-            userManager.updateUser(oldUser, user);
-        } catch (ValidationException e) {
-            return Response.status(Response.Status.BAD_REQUEST).entity(e.getMessage()).build();
-        } catch (ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
+    public Response updateUser(@PathParam("id") String userToUpdate, Client update) {
+        UUID id = UUID.fromString(userToUpdate);
+        userManager.updateUser(id, update);
+
         return Response.ok().build();
     }
 
+    // ACTIVATE [HEAD -> 200]
     @HEAD
     @Path("/activate/{id}")
     public Response activateUser(@PathParam("id") String id) {
-        try {
-            userManager.activateUser(UUID.fromString(id));
-        } catch (ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
+        userManager.activateUser(UUID.fromString(id));
+
         return Response.ok().build();
     }
 
-    //DELETE\\
-    @DELETE
-    @Path("/{id}")
-    @Consumes("application/json")
+    // DEACTIVATE [HEAD -> 200]
+    @HEAD
+    @Path("/deactivate/{id}")
     public Response archiveUser(@PathParam("id") String id) {
-        try {
-            userManager.removeUser(UUID.fromString(id));
-        } catch (ResourceNotFoundException e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(e.getMessage()).build();
-        }
+        userManager.deactivateUser(UUID.fromString(id));
+
         return Response.ok().build();
     }
 
-    //READ\\
+    // READ [GET -> 200]
     @GET
     @Path("/{id}")
     @Produces("application/json")
     public Response getUserById(@PathParam("id") String id) {
-        User user = userManager.getUserById(UUID.fromString(id), false);
-
-        if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-        }
+        User user = userManager.getUserById(UUID.fromString(id), true);
 
         return Response.ok(user).build();
     }
 
-    @GET
-    @Path("/search")
-    @Produces("application/json")
-    public Response getUsersContainsLogin(@QueryParam("login") String login) {
-        return Response.ok(userManager.searchUsers(login)).build();
 
+    // SEARCH [GET -> 200]
+    @GET
+    @Path("/search/{login}")
+    @Produces("application/json")
+    public Response getUsersContainsLogin(@PathParam("login") String login) {
+        return Response.ok(userManager.searchUsers(login)).build();
     }
 
+    // READ [GET -> 200]
     @GET
     @Path("/login/{login}")
     @Produces("application/json")
     public Response getUserByLogin(@PathParam("login") String login) {
         User user = userManager.getUserByLogin(login);
 
-        if (user == null) {
-            return Response.status(Response.Status.NOT_FOUND).entity("User not found").build();
-        }
         return Response.ok(user).build();
-
     }
 
-
+    // READ [GET -> 200]
     @GET
     @Path("/all")
     @Produces("application/json")
-    public Response getAllUsers(@QueryParam("scope") String scope) {
-        if (scope == null) scope = "active";
+    public Response getAllUsers(@QueryParam(value = "scope") @DefaultValue("") String scope) {
+        if (scope.isEmpty()) scope = "all";
         List<User> toReturn;
         switch (scope) {
             case "active":
@@ -137,7 +142,7 @@ public class UserEndpoint {
                 toReturn = userManager.getAllUsers();
                 break;
             default:
-                return Response.status(Response.Status.BAD_REQUEST).entity("Wrong scope").build();
+                return Response.status(Response.Status.BAD_REQUEST).build();
         }
 
         return Response.ok(toReturn).build();

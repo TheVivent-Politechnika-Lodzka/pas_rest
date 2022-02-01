@@ -3,17 +3,16 @@ package pl.ias.pas.hotelroom.pasrest.managers;
 import pl.ias.pas.hotelroom.pasrest.dao.HotelRoomDao;
 import pl.ias.pas.hotelroom.pasrest.dao.ReservationDao;
 import pl.ias.pas.hotelroom.pasrest.dao.UserDao;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceAllocated;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ResourceNotFoundException;
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.ValidationException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceAllocatedException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.ValidationException;
 import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
-import java.util.ArrayList;
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,98 +31,103 @@ public class ReservationManager {
         return reservationDao.getReservationById(id);
     }
 
-    public UUID addReservation(Reservation reservation) throws ResourceNotFoundException, ResourceAllocated, ValidationException {
+    public UUID addReservation(Reservation reservation, UUID userId, UUID roomId) {
 
-        UUID id = UUID.randomUUID();
-        Reservation newReservation;
-        User user = userDao.getUserById(reservation.getUserId());
-        HotelRoom room = roomDao.getRoomById(reservation.getRoomId());
+        User user = userDao.getUserById(userId);
+        HotelRoom room = roomDao.getRoomById(roomId);
 
-        //sprawdzenie czy klient i pokoj istnieja
-        if (user == null) {
-            throw new ResourceNotFoundException("User does not exist");
+        if (room.isActive() == false) {
+            throw new ResourceNotFoundException("Room is not active");
         }
-        if (room == null) {
-            throw new ResourceNotFoundException("Room does not exist");
+
+        Instant endDate = reservation.getEndDate();
+        Instant startDate = reservation.getStartDate();
+        if (startDate == null) startDate = Instant.now();
+        if (endDate != null && startDate.isAfter(endDate)) {
+            throw new ValidationException("Start date is after end date");
         }
+
+        final Instant finalStartDate = startDate;
+        final Instant finalEndDate = endDate;
 
         //sprawdzenie czy nie jest juz przypadkiem wynajmowany
-        if(room.isAllocated()) {
-            throw new ResourceAllocated("Room is already occupied");
+        List<Reservation> tmpReservations = reservationDao.customSearch((res) -> {
+            // jeżeli to inny pokój, to nie ma znaczenia
+            if (!res.getHotelRoom().getId().equals(roomId)) return false;
+
+            if (res.getEndDate() == null) {
+                // jeżeli nie ma konca to jest w trakcie
+                // jeżeli start nowej rezerwacji jest po starej to jest konflikt
+                if (finalStartDate.isAfter(res.getStartDate())) return true;
+            } else {
+                // jeżeli początek nowej rezerwacji jest w granicach dat starej to jest konflikt
+                if (finalStartDate.isAfter(res.getStartDate()) && finalStartDate.isBefore(res.getEndDate()))
+                    return true;
+                // jeżeli koniec nowej rezerwacji jest w granicach dat starej to jest konflikt
+                if (finalEndDate != null) {
+                    if (finalEndDate.isAfter(res.getStartDate()) && finalEndDate.isBefore(res.getStartDate()))
+                        return true;
+                }
+            }
+            return false;
+        });
+
+        if (!tmpReservations.isEmpty()) {
+            throw new ResourceAllocatedException("Room is already occupied");
         }
 
-        reservation.validate();
-        room.setAllocated(true);
-        newReservation = new Reservation(id, user.getId(), room.getId());
+        Reservation newReservation = new Reservation(UUID.randomUUID(), startDate, endDate);
 
-        if (reservation.getStartDate() != null) {
-            newReservation.setStartDate(reservation.getStartDate());
-        } else {
-            newReservation.setStartDate(System.currentTimeMillis());
-        }
-
-        if (reservation.getEndDate() != null) {
-            newReservation.setEndDate(reservation.getEndDate());
-        }
-
-        return reservationDao.addReservation(newReservation);
+        return reservationDao.addReservation(newReservation, user.getId(), room.getId());
     }
 
-    public void archiveReservation(UUID id) throws ResourceNotFoundException, IDontKnowException {
-
-        if (reservationDao.getReservationById(id) == null) {
-            throw new ResourceNotFoundException("Reservation does not exist");
-        }
-
+    public void endReseravation(UUID id) {
         reservationDao.endReservation(id);
     }
 
-    public void updateReservation(Reservation old, Reservation reservation) throws ResourceNotFoundException {
-        if (reservationDao.getReservationById(old.getId()) == null) {
-            throw new ResourceNotFoundException("Reservation does not exist");
-        }
+    // za dużo myślenia nad implementacją
+//    public void updateReservation(UUID reservationToUpdate, Reservation update) {
+//        // sprawdzi czy user/room istnieje
+//        if (update.getUserId() != null) {
+//            userDao.getUserById(update.getUserId());
+//        }
+//        if(update.getRoomId() != null) {
+//            roomDao.getRoomById(update.getRoomId());
+//        }
+//
+//
+//        reservationDao.updateReservation(reservationToUpdate, update);
+//    }
 
-        if (reservation.getUserId() != null)
-            if (userDao.getUserById(reservation.getUserId()) == null)
-                throw new ResourceNotFoundException("User does not exist");
 
-        if (reservation.getRoomId() != null)
-            if (roomDao.getRoomById(reservation.getRoomId()) == null)
-                throw new ResourceNotFoundException("Room does not exist");
-
-        reservationDao.updateReservation(old, reservation);
+    public List<Reservation> getEndedReservations() {
+        return reservationDao.customSearch((reservation) -> !reservation.isActive());
     }
 
-
-    public List<Reservation> getArchivedReservation() {
-        return reservationDao.getArchivedReservations();
-    }
-
-    public List<Reservation> getActiveReservation() {
-        return reservationDao.getActiveReservations();
+    public List<Reservation> getActiveReservations() {
+        return reservationDao.customSearch((reservation) -> reservation.isActive());
     }
 
     public List<Reservation> getAllReservations() {
         return reservationDao.getAllReservations();
     }
 
-    public List<Reservation> searchReservations(UUID cliendId, boolean includeArchived) {
-        List<Reservation> toReturn = new ArrayList<>();
+    public List<Reservation> searchReservations(String cliendId, String roomId, boolean includeArchived) {
+        // sprawdź czy user istnieje
+//        userDao.getUserById(cliendId);
 
-        for (Reservation reservation : getActiveReservation()) {
-            if (reservation.getUserId().equals(cliendId)) {
-                toReturn.add(reservation);
-            }
+        List<Reservation> result;
+        result = reservationDao.customSearch((reservation) ->
+                reservation.getUser().getId().toString().contains(cliendId) &&
+                        reservation.getHotelRoom().getId().toString().contains(roomId) &&
+                        (includeArchived || reservation.isActive())
+        );
+
+        if (result.isEmpty()) {
+            throw new ResourceNotFoundException("No reservations found");
         }
 
-        if (!includeArchived) return toReturn;
-        for (Reservation reservation : getArchivedReservation()) {
-            if (reservation.getUserId().equals(cliendId)) {
-                toReturn.add(reservation);
-            }
-        }
-
-        return toReturn;
+        return result;
     }
 
 }

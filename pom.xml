@@ -18,24 +18,24 @@
     </properties>
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>jakarta.platform</groupId>-->
-<!--            <artifactId>jakarta.jakartaee-api</artifactId>-->
-<!--            <version>9.0.0</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.junit.jupiter</groupId>-->
-<!--            <artifactId>junit-jupiter-api</artifactId>-->
-<!--            <version>${junit.version}</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.junit.jupiter</groupId>-->
-<!--            <artifactId>junit-jupiter-engine</artifactId>-->
-<!--            <version>${junit.version}</version>-->
-<!--            <scope>test</scope>-->
-<!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>jakarta.platform</groupId>-->
+        <!--            <artifactId>jakarta.jakartaee-api</artifactId>-->
+        <!--            <version>9.0.0</version>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.junit.jupiter</groupId>-->
+        <!--            <artifactId>junit-jupiter-api</artifactId>-->
+        <!--            <version>${junit.version}</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.junit.jupiter</groupId>-->
+        <!--            <artifactId>junit-jupiter-engine</artifactId>-->
+        <!--            <version>${junit.version}</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -72,6 +72,11 @@
             <version>2.35</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.pushtorefresh</groupId>
+            <artifactId>javac-warning-annotation</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -103,39 +108,39 @@
                     <forkMode>always</forkMode>
                     <environmentVariables>
                         <testContext>${project.test.context}</testContext>
-<!--                        <variable>-->
-<!--                            <name>testContext</name>-->
-<!--                            <value>${project.test.context}</value>-->
-<!--                        </variable>-->
+                        <!--                        <variable>-->
+                        <!--                            <name>testContext</name>-->
+                        <!--                            <value>${project.test.context}</value>-->
+                        <!--                        </variable>-->
                     </environmentVariables>
                 </configuration>
-<!--                <configuration>-->
-<!--                    <testSourceDirectory>src/test/java</testSourceDirectory>-->
-<!--                    <includes>-->
-<!--                        <include>**/*Test.java</include>-->
-<!--                    </includes>-->
-<!--                </configuration>-->
+                <!--                <configuration>-->
+                <!--                    <testSourceDirectory>src/test/java</testSourceDirectory>-->
+                <!--                    <includes>-->
+                <!--                        <include>**/*Test.java</include>-->
+                <!--                    </includes>-->
+                <!--                </configuration>-->
             </plugin>
             <plugin>
                 <groupId>fish.payara.maven.plugins</groupId>
                 <artifactId>payara-micro-maven-plugin</artifactId>
                 <version>1.4.0</version>
-                <executions>
-                    <execution>
-                        <id>pre-integration-payara</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-integration-payara</id>
-                        <phase>post-integration-test</phase>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
+                <!--                <executions>-->
+                <!--                    <execution>-->
+                <!--                        <id>pre-integration-payara</id>-->
+                <!--                        <phase>pre-integration-test</phase>-->
+                <!--                        <goals>-->
+                <!--                            <goal>start</goal>-->
+                <!--                        </goals>-->
+                <!--                    </execution>-->
+                <!--                    <execution>-->
+                <!--                        <id>post-integration-payara</id>-->
+                <!--                        <phase>post-integration-test</phase>-->
+                <!--                        <goals>-->
+                <!--                            <goal>stop</goal>-->
+                <!--                        </goals>-->
+                <!--                    </execution>-->
+                <!--                </executions>-->
                 <configuration>
                     <payaraVersion>5.2021.8</payaraVersion>
                     <deployWar>true</deployWar>

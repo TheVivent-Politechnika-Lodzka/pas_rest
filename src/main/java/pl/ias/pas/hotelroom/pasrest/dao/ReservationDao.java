@@ -1,80 +1,121 @@
 package pl.ias.pas.hotelroom.pasrest.dao;
 
-import pl.ias.pas.hotelroom.pasrest.exceptions.exceptionstouseinfuturethenrefactortoremovethatstupidlongpackagename.IDontKnowException;
+import com.pushtorefresh.javac_warning_annotation.Warning;
+import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceAlreadyExistException;
+import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
+import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import java.time.Instant;
 import java.util.*;
-import java.sql.Date;
+import java.util.function.Predicate;
 
 
 @ApplicationScoped
 public class ReservationDao {
 
-    private List<Reservation> reservationsRepository = Collections.synchronizedList(new ArrayList<>());
-//    private List<Reservation> archiveRepository = Collections.synchronizedList(new ArrayList<>());
+    @Inject
+    private UserDao users;
+    @Inject
+    private HotelRoomDao rooms;
 
-    public UUID addReservation(Reservation reservation) {
-        reservationsRepository.add(reservation);
-        return reservation.getId();
+    private Map<UUID, Reservation> reservationsById = new HashMap<>();
+
+    @Warning("This method is for testing only !!!")
+    synchronized public void deleteReservation(UUID id) {
+        if (reservationsById.containsKey(id)) {
+            reservationsById.remove(id);
+        } else {
+            throw new ResourceNotFoundException("Reservation with id " + id + " does not exist");
+        }
     }
 
-    public UUID addReservationToArchive(Reservation reservation) {
+    synchronized public UUID addReservation(Reservation reservation, UUID userId, UUID roomId) {
+        User user = users.getActualUser(userId);
+        HotelRoom hotelRoom = rooms.getActualRoom(roomId);
 
-        getReservationById(reservation.getId()).setEndDate(System.currentTimeMillis());
-        return reservation.getId();
+        UUID id = UUID.randomUUID();
+        Reservation newReservation = new Reservation(id, reservation.getStartDate(), reservation.getEndDate());
+        newReservation.setUser(user);
+        newReservation.setHotelRoom(hotelRoom);
+
+        if (reservationsById.containsKey(newReservation.getId())) {
+            throw new ResourceAlreadyExistException("Reservation with id " + newReservation.getId() + " already exists");
+        }
+
+        reservationsById.put(newReservation.getId(), newReservation);
+        return newReservation.getId();
     }
 
-    public Reservation getReservationById(UUID id) {
-        for (Reservation reservation : reservationsRepository) {
-            if (reservation.getId().equals(id)) {
-                return reservation;
+    synchronized public Reservation getReservationById(UUID id) {
+        Reservation reservation = reservationsById.get(id);
+        if (reservation == null) {
+            throw new ResourceNotFoundException("Reservation with id " + id + " does not exist");
+        }
+        return new Reservation(reservation);
+    }
+
+    synchronized public void updateReservation(UUID reservationToUpdate, Reservation update) {
+        Reservation reservation = reservationsById.get(reservationToUpdate);
+
+//        if(update.getRoomId() != null) {
+//            reservation.setRoomId(update.getRoomId());
+//        }
+//        if(update.getUserId() != null) {
+//            reservation.setUserId(update.getUserId());
+//        }
+        if (update.getStartDate() != null) {
+            reservation.setStartDate(update.getStartDate());
+        }
+        if (update.getEndDate() != null) {
+            reservation.setEndDate(update.getEndDate());
+        }
+    }
+
+    synchronized public void endReservation(UUID reservationId) {
+        Reservation reservation = reservationsById.get(reservationId);
+        if (reservation == null) {
+            throw new ResourceNotFoundException("Reservation with id " + reservationId + " does not exist");
+        }
+        reservation.setEndDate(Instant.now());
+    }
+
+    synchronized public List<Reservation> getAllReservations() {
+        List<Reservation> reservations = new ArrayList<Reservation>(reservationsById.size());
+        reservationsById.forEach((key, reservation) -> reservations.add(new Reservation(reservation)));
+        return reservations;
+    }
+
+    synchronized public List<Reservation> customSearch(Predicate<Reservation> lambda) {
+        List<Reservation> reservations = new ArrayList<>();
+        reservationsById.forEach((id, reservation) -> {
+            if (lambda.test(reservation)) {
+                reservations.add(new Reservation(reservation));
             }
-        }
-        return null;
+        });
+        return reservations;
     }
 
-    public void updateReservation(Reservation oldReservation, Reservation reservation) {
-        if(reservation.getRoomId() != null) {
-            oldReservation.setRoomId(reservation.getRoomId());
-        }
-        if(reservation.getUserId() != null) {
-            oldReservation.setUserId(reservation.getUserId());
-        }
-        if(reservation.getStartDate() != null) {
-            oldReservation.setStartDate(reservation.getStartDate());
-        }
-    }
-
-    public void endReservation(UUID reservationId) throws IDontKnowException {
-        Reservation res = getReservationById(reservationId);
-        if (res.getEndDate() == 0 && new Date(System.currentTimeMillis()).after(res.getActualEndDate()))
-            throw new IDontKnowException("Reservation with id " + reservationId + " already ended");
-        res.setEndDate(System.currentTimeMillis());
-
-    }
-
-    public List<Reservation> getAllReservations() {
-        return reservationsRepository;
-    }
-
-    public List<Reservation> getArchivedReservations() {
-        List<Reservation> archivedReservations = new ArrayList<>();
-        for (Reservation reservation : reservationsRepository) {
-            if (!reservation.isActive()) {
-                archivedReservations.add(reservation);
-            }
-        }
-        return archivedReservations;
-    }
-
-    public List<Reservation> getActiveReservations() {
-        List<Reservation> activeReservations = new ArrayList<>();
-        for (Reservation reservation : reservationsRepository) {
-            if (reservation.isActive()) {
-                activeReservations.add(reservation);
-            }
-        }
-        return activeReservations;
-    }
+//    public List<Reservation> getArchivedReservations() {
+//        List<Reservation> archivedReservations = new ArrayList<>();
+//        for (Reservation reservation : reservationsRepository) {
+//            if (!reservation.isActive()) {
+//                archivedReservations.add(reservation);
+//            }
+//        }
+//        return archivedReservations;
+//    }
+//
+//    public List<Reservation> getActiveReservations() {
+//        List<Reservation> activeReservations = new ArrayList<>();
+//        for (Reservation reservation : reservationsRepository) {
+//            if (reservation.isActive()) {
+//                activeReservations.add(reservation);
+//            }
+//        }
+//        return activeReservations;
+//    }
 }
