@@ -4,7 +4,9 @@ import com.pushtorefresh.javac_warning_annotation.Warning;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceAlreadyExistException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceNotFoundException;
 import pl.ias.pas.hotelroom.pasrest.model.User;
+import pl.ias.pas.hotelroom.pasrest.model.UserAdmin;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
 import java.util.*;
 import java.util.function.Predicate;
@@ -16,6 +18,13 @@ public class UserDao {
 //    private List<User> archiveRepository = Collections.synchronizedList(new ArrayList<>());
     private Map<UUID, User> usersById = new HashMap<>();
     private Map<String, User> usersByLogin = new HashMap<>();
+
+
+    @PostConstruct
+    public void init() {
+        User user = new UserAdmin(UUID.randomUUID(), "admin", "admin1", "admin", "admin");
+        addUser(user);
+    }
 
     @Warning("This method is for testing only !!!")
     synchronized public void deleteUser(UUID id) {
@@ -35,6 +44,16 @@ public class UserDao {
         } else {
             throw new ResourceNotFoundException("User with id " + id + " does not exist");
         }
+    }
+
+    synchronized public User isPasswordForUserCorrect(String login, String password) {
+        User user = usersByLogin.get(login);
+
+        if (user == null || !user.getPassword().equals(password)) {
+            return null;
+        }
+
+        return user.copy();
     }
 
     synchronized public UUID addUser(User user) {

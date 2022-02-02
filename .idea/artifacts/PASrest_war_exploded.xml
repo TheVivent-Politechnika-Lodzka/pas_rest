@@ -19,6 +19,8 @@
           <element id="library" level="project" name="Maven: com.sun.mail:javax.mail:1.6.2" />
           <element id="library" level="project" name="Maven: javax.activation:activation:1.1" />
           <element id="library" level="project" name="Maven: com.pushtorefresh:javac-warning-annotation:1.0.0" />
+          <element id="library" level="project" name="Maven: com.nimbusds:nimbus-jose-jwt:9.18" />
+          <element id="library" level="project" name="Maven: com.github.stephenc.jcip:jcip-annotations:1.0-1" />
         </element>
       </element>
       <element id="directory" name="META-INF">
