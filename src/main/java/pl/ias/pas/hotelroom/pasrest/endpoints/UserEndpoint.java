@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
@@ -26,9 +25,6 @@ public class UserEndpoint {
 
     @Inject
     private UserManager userManager;
-
-    @Inject
-    private HttpHeaders headers;
 
     // przykładowe zapytanie tworzące nowego użytkownika
     // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/user login=test password=test name=test surname=test
@@ -80,11 +76,11 @@ public class UserEndpoint {
     public Response updateUser(
             @PathParam("id") String userToUpdate,
             Client update,
-            @Context SecurityContext context
+            @Context SecurityContext context,
+            @HeaderParam("Authorization") String token
     ) {
         if (context.isUserInRole("CLIENT")) {
-            String userId =
-                    JwtUtils.getUserId(headers.getHeaderString("Authorization"));
+            String userId = JwtUtils.getUserId(token);
             if (!userId.equals(userToUpdate)) {
                 return Response.status(Response.Status.FORBIDDEN).build();
             }
@@ -118,10 +114,14 @@ public class UserEndpoint {
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Response getUserById(@PathParam("id") String id, @Context SecurityContext context) {
+    public Response getUserById(
+            @PathParam("id") String id,
+            @Context SecurityContext context,
+            @HeaderParam("Authorization") String token
+    ) {
         if (context.isUserInRole("CLIENT")) {
             String userId =
-                    JwtUtils.getUserId(headers.getHeaderString("Authorization"));
+                    JwtUtils.getUserId(token);
             if (!userId.equals(id)) {
                 return Response.status(Response.Status.FORBIDDEN).build();
             }

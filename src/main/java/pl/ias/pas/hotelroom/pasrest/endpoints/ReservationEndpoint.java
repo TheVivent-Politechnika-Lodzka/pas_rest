@@ -9,7 +9,6 @@ import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
@@ -23,9 +22,6 @@ public class ReservationEndpoint {
 
     @Inject
     private ReservationManager reservationManager;
-
-    @Inject
-    private HttpHeaders headers;
 
     // przykładowe zapytanie tworzące nowej rezerwacji, trza niestety uzupelniac
     // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/reservation uid=  rid=
@@ -94,10 +90,11 @@ public class ReservationEndpoint {
             @QueryParam(value = "clientId") @DefaultValue("") String clientId,
             @QueryParam(value = "roomId") @DefaultValue("") String roomId,
             @QueryParam(value = "archived") @DefaultValue("true") boolean archived,
-            @Context SecurityContext context
+            @Context SecurityContext context,
+            @HeaderParam("Authorization") String token
     ) {
         if (context.isUserInRole("CLIENT")) {
-            String userId = JwtUtils.getUserId(headers.getHeaderString("Authorization"));
+            String userId = JwtUtils.getUserId(token);
             if (!clientId.equals(userId)) {
                 return Response.status(Response.Status.FORBIDDEN).build();
             }
