@@ -53,6 +53,10 @@ public class UserDao {
             return null;
         }
 
+        if (!user.isActive()) {
+            return null;
+        }
+
         return user.copy();
     }
 

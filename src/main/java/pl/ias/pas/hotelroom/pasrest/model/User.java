@@ -1,13 +1,11 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
 
-import com.nimbusds.jose.shaded.json.annotate.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ValidationException;
-import pl.ias.pas.hotelroom.pasrest.security.JwtSignable;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -16,7 +14,7 @@ import java.util.UUID;
 //@Data
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
-abstract public class User<T extends User<T>> implements JwtSignable {
+abstract public class User<T extends User<T>> {
 
     @EqualsAndHashCode.Include
     @Getter
@@ -50,12 +48,6 @@ abstract public class User<T extends User<T>> implements JwtSignable {
     @Getter
     @Setter
     private boolean isActive = true;
-
-    @Override
-    @JsonIgnore
-    public String getPayload() {
-        return id.toString();
-    }
 
     public User(UUID id, String login, String password, String name, String surname) {
         this.id = id;

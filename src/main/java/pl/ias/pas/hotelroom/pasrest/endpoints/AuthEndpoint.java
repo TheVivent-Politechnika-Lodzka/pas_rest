@@ -1,5 +1,6 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
+import pl.ias.pas.hotelroom.pasrest.managers.UserManager;
 import pl.ias.pas.hotelroom.pasrest.model.CredentialsData;
 import pl.ias.pas.hotelroom.pasrest.security.JwtUtils;
 
@@ -13,10 +14,14 @@ import javax.security.enterprise.identitystore.IdentityStoreHandler;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import java.util.UUID;
 
 @RequestScoped
 @Path("/auth")
 public class AuthEndpoint {
+
+    @Inject
+    UserManager userManager;
 
     @Inject
     private IdentityStoreHandler indentityStore;
@@ -35,10 +40,12 @@ public class AuthEndpoint {
         Credential credential = new UsernamePasswordCredential(credentials.getLogin(), new Password(credentials.getPassword()));
         CredentialValidationResult result = indentityStore.validate(credential);
 
+        UUID userId = userManager.getUserByLogin(credentials.getLogin()).getId();
+
         if (result.getStatus() == CredentialValidationResult.Status.VALID) {
             return Response.accepted()
                     .type("application/jwt")
-                    .entity(JwtUtils.generateJwtString(result))
+                    .entity(JwtUtils.generateJwtString(result, userId))
                     .build();
         }
 

@@ -45,7 +45,7 @@ public class JwtAuthMechanism implements HttpAuthenticationMechanism {
             try {
                 SignedJWT signedJWT = SignedJWT.parse(token);
                 String login = signedJWT.getJWTClaimsSet().getSubject();
-                String groups = signedJWT.getJWTClaimsSet().getStringClaim("auth");
+                String groups = signedJWT.getJWTClaimsSet().getStringClaim("permissionLevel");
                 Date expirationDate = (Date) signedJWT.getJWTClaimsSet().getClaim("exp");
                 boolean expired = new Date().after(expirationDate);
                 if (expired) {
