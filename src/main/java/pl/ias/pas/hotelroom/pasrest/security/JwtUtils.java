@@ -5,6 +5,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.JWSSigner;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
@@ -42,13 +43,8 @@ public class JwtUtils {
 
     public static boolean validateJwtToken(String token) {
         try {
-            return true;
-//            final String fromHeader = JWSObject.parse(token).getPayload().toString();
-
-
-//            return fromHeader.equals(fromEntity);
-
-
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.verify(new MACVerifier(SECRET));
         } catch (Exception e) {
             return false;
         }
