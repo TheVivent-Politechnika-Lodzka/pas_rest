@@ -2,6 +2,43 @@
 <web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
 
+    <!--    ENDPOINTS   -->
+    <!--    /user-->
+    <!--        /user/create						- USER_ADMIN-->
+    <!--        /user/createUserAdmin			    - USER_ADMIN-->
+    <!--        /user/createResourceAdmin		    - USER_ADMIN-->
+    <!--        /user/* [GET, UPDATE]			    - USER_ADMIN, CLIENT (tylko, jeżeli id się zgadza)-->
+    <!--        /user/activate/*					- USER_ADMIN-->
+    <!--        /user/deactivate/*				    - USER_ADMIN-->
+    <!--        /user/search/*						- USER_ADMIN, RESOURCE_ADMIN-->
+    <!--        /user/login/*						- USER_ADMIN-->
+    <!--        /user/all							- USER_ADMIN, RESOURCE_ADMIN-->
+
+    <!--    /room-->
+    <!--        /room [CREATE]							- RESOURCE_ADMIN-->
+    <!--        /room/* [UPDATE, DELETE, GET]	        - RESOURCE_ADMIN, CLIENT (tylko GET)-->
+    <!--        /room/number/*							- RESOURCE_ADMIN, CLIENT-->
+    <!--        /room/all								- USER_ADMIN, RESOURCE_ADMIN, CLIENT-->
+
+    <!--    /reservation-->
+    <!--        /reservation/{userid}/{roomid}	    - USER_ADMIN, RESOURCE_ADMIN-->
+    <!--        /reservation/end/*					- USER_ADMIN, RESOURCE_ADMIN-->
+    <!--        /reservation/* [GET]				- USER_ADMIN, RESOURCE_ADMIN, CLIENT-->
+    <!--        /reservation/all				    - USER_ADMIN, RESOURCE_ADMIN-->
+    <!--        /reservation/search					- USER_ADMIN, RESOURCE_ADMIN, CLIENT (tylko jeżeli id się zgadza)-->
+    <!--    KONIEC ENDPOINTS    -->
+
+
+    <security-role>
+        <role-name>CLIENT</role-name>
+    </security-role>
+    <security-role>
+        <role-name>USER_ADMIN</role-name>
+    </security-role>
+    <security-role>
+        <role-name>RESOURCE_ADMIN</role-name>
+    </security-role>
+
     <security-constraint>
         <display-name>SecuredTransport</display-name>
         <web-resource-collection>
@@ -13,5 +50,99 @@
         </user-data-constraint>
     </security-constraint>
 
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>USER_ADMIN_ONLY</web-resource-name>
+            <url-pattern>/user/create</url-pattern>
+            <url-pattern>/user/createUserAdmin</url-pattern>
+            <url-pattern>/user/createResourceAdmin</url-pattern>
+            <url-pattern>/user/activate/*</url-pattern>
+            <url-pattern>/user/deactivate/*</url-pattern>
+            <url-pattern>/user/search/*</url-pattern>
+            <url-pattern>/user/all</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>USER_ADMIN</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>RESOURCE_ADMIN_ONLY</web-resource-name>
+            <url-pattern>/room</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>RESOURCE_ADMIN</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>USER_ADMIN_AND_RESOURCE_ADMIN</web-resource-name>
+            <url-pattern>/reservation/*</url-pattern>
+            <url-pattern>/user/search/*</url-pattern>
+            <url-pattern>/user/all</url-pattern>
+            <url-pattern>/room/all</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>USER_ADMIN</role-name>
+            <role-name>RESOURCE_ADMIN</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>ALL</web-resource-name>
+            <url-pattern>/room/all</url-pattern>
+            <url-pattern>/reservation/search</url-pattern>
+            <url-pattern>/reservation/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>CLIENT</role-name>
+            <role-name>USER_ADMIN</role-name>
+            <role-name>RESOURCE_ADMIN</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>RESOURCE_ADMIN_AND_CLIENT</web-resource-name>
+            <url-pattern>/room/*</url-pattern>
+            <url-pattern>/room/number/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>RESOURCE_ADMIN</role-name>
+            <role-name>CLIENT</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>USER_ADMIN_AND_CLIENT</web-resource-name>
+            <url-pattern>/user/*</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>USER_ADMIN</role-name>
+            <role-name>CLIENT</role-name>
+        </auth-constraint>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
 
 </web-app>

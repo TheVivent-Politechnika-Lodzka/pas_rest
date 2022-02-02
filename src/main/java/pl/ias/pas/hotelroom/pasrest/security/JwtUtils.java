@@ -54,5 +54,15 @@ public class JwtUtils {
         }
     }
 
+    public static String getUserId(String token) {
+        token = token.replace("Bearer ", "");
+        try {
+            SignedJWT signedJWT = SignedJWT.parse(token);
+            return signedJWT.getJWTClaimsSet().getStringClaim("userId");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
 
 }

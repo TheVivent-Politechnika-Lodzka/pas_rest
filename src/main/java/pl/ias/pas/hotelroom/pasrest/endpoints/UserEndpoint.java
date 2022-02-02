@@ -5,12 +5,16 @@ import pl.ias.pas.hotelroom.pasrest.model.Client;
 import pl.ias.pas.hotelroom.pasrest.model.ResourceAdmin;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 import pl.ias.pas.hotelroom.pasrest.model.UserAdmin;
+import pl.ias.pas.hotelroom.pasrest.security.JwtUtils;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +26,9 @@ public class UserEndpoint {
 
     @Inject
     private UserManager userManager;
+
+    @Inject
+    private HttpHeaders headers;
 
     // przykładowe zapytanie tworzące nowego użytkownika
     // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/user login=test password=test name=test surname=test
@@ -70,7 +77,19 @@ public class UserEndpoint {
     @POST
     @Path("/{id}")
     @Consumes("application/json")
-    public Response updateUser(@PathParam("id") String userToUpdate, Client update) {
+    public Response updateUser(
+            @PathParam("id") String userToUpdate,
+            Client update,
+            @Context SecurityContext context
+    ) {
+        if (context.isUserInRole("CLIENT")) {
+            String userId =
+                    JwtUtils.getUserId(headers.getHeaderString("Authorization"));
+            if (!userId.equals(userToUpdate)) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+        }
+
         UUID id = UUID.fromString(userToUpdate);
         userManager.updateUser(id, update);
 
@@ -99,7 +118,14 @@ public class UserEndpoint {
     @GET
     @Path("/{id}")
     @Produces("application/json")
-    public Response getUserById(@PathParam("id") String id) {
+    public Response getUserById(@PathParam("id") String id, @Context SecurityContext context) {
+        if (context.isUserInRole("CLIENT")) {
+            String userId =
+                    JwtUtils.getUserId(headers.getHeaderString("Authorization"));
+            if (!userId.equals(id)) {
+                return Response.status(Response.Status.FORBIDDEN).build();
+            }
+        }
         User user = userManager.getUserById(UUID.fromString(id), true);
 
         return Response.ok(user).build();
@@ -128,7 +154,9 @@ public class UserEndpoint {
     @GET
     @Path("/all")
     @Produces("application/json")
-    public Response getAllUsers(@QueryParam(value = "scope") @DefaultValue("") String scope) {
+    public Response getAllUsers(
+            @QueryParam(value = "scope") @DefaultValue("") String scope
+    ) {
         if (scope.isEmpty()) scope = "all";
         List<User> toReturn;
         switch (scope) {

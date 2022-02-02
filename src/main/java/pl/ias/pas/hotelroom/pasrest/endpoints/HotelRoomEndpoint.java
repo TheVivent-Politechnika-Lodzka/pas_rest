@@ -6,7 +6,9 @@ import pl.ias.pas.hotelroom.pasrest.model.HotelRoom;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 import java.net.URI;
 import java.util.UUID;
 
@@ -34,7 +36,10 @@ public class HotelRoomEndpoint {
     @POST
     @Path("/{id}")
     @Consumes("application/json")
-    public Response updateRoom(@PathParam("id") String roomToUpdate, HotelRoom update) {
+    public Response updateRoom(@PathParam("id") String roomToUpdate, HotelRoom update, @Context SecurityContext context) {
+        if (context.isUserInRole("CLIENT")) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
         UUID id = UUID.fromString(roomToUpdate);
         roomManager.updateRoom(id, update);
 
@@ -44,7 +49,10 @@ public class HotelRoomEndpoint {
     // DELETE [DELETE -> 200]
     @DELETE
     @Path("/{id}")
-    public Response removeRoom(@PathParam("id") String id) {
+    public Response removeRoom(@PathParam("id") String id, @Context SecurityContext context) {
+        if (context.isUserInRole("CLIENT")) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        }
         roomManager.deleteRoom(UUID.fromString(id));
         return Response.ok().build();
     }
