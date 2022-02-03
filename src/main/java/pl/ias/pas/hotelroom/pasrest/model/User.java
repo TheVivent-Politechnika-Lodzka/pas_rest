@@ -1,6 +1,7 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
 
+import com.nimbusds.jose.shaded.json.annotate.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,8 +28,15 @@ abstract public class User<T extends User<T>> {
     @Pattern(regexp = "^[a-zA-Z0-9]{3,20}$", message = "Login must be 3-20 characters long and contain only letters and numbers")
     private String login;
 
-    @Getter
-    @Setter
+    @JsonIgnore
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @NotBlank
     @Pattern(regexp = "^[a-zA-Z0-9]{3,20}$", message = "Password must be 3-20 characters long and contain only letters and numbers")
     private String password;
@@ -76,7 +84,7 @@ abstract public class User<T extends User<T>> {
     }
 
     public void validatePassword() throws ValidationException {
-        if (password.length() < 8 || password.length() > 20)
+        if (password.length() < 6 || password.length() > 20)
             throw new ValidationException("Password must be between 8 and 20 characters");
     }
 
