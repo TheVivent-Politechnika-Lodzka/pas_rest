@@ -25,6 +25,7 @@ public class HotelRoomEndpoint {
 
     // CREATE [POST -> 201]
     @POST
+    @Path("/create")
     @Consumes("application/json")
     public Response createRoom(HotelRoom room) {
         UUID createdRoom = roomManager.addRoom(room);
@@ -34,7 +35,7 @@ public class HotelRoomEndpoint {
 
     // UPDATE [POST -> 200]
     @POST
-    @Path("/{id}")
+    @Path("/update/{id}")
     @Consumes("application/json")
     public Response updateRoom(@PathParam("id") String roomToUpdate, HotelRoom update, @Context SecurityContext context) {
         if (context.isUserInRole("CLIENT")) {
@@ -48,7 +49,7 @@ public class HotelRoomEndpoint {
 
     // DELETE [DELETE -> 200]
     @DELETE
-    @Path("/{id}")
+    @Path("/delete/{id}")
     public Response removeRoom(@PathParam("id") String id, @Context SecurityContext context) {
         if (context.isUserInRole("CLIENT")) {
             return Response.status(Response.Status.FORBIDDEN).build();
@@ -59,7 +60,7 @@ public class HotelRoomEndpoint {
 
     // READ [GET -> 200]
     @GET
-    @Path("/{id}")
+    @Path("/get/id/{id}")
     @Produces("application/json")
     public Response getRoomById(@PathParam("id") String id) {
         HotelRoom room = roomManager.getRoomById(UUID.fromString(id));
@@ -69,7 +70,7 @@ public class HotelRoomEndpoint {
 
     // READ [GET -> 200]
     @GET
-    @Path("/number/{number}")
+    @Path("/get/number/{number}")
     @Produces("application/json")
     public Response getRoomByNumber(@PathParam("number") int number) {
         HotelRoom room = roomManager.getRoomByNumber(number);
@@ -79,7 +80,7 @@ public class HotelRoomEndpoint {
 
     // READ [GET -> 200]
     @GET
-    @Path("/all")
+    @Path("/get/all")
     @Produces("application/json")
     public Response getAllRooms() {
         return Response.ok(roomManager.getAllRooms()).build();

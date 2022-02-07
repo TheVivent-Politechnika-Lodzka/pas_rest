@@ -3,6 +3,7 @@ package pl.ias.pas.hotelroom.pasrest.dao;
 import com.pushtorefresh.javac_warning_annotation.Warning;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceAlreadyExistException;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ResourceNotFoundException;
+import pl.ias.pas.hotelroom.pasrest.model.ResourceAdmin;
 import pl.ias.pas.hotelroom.pasrest.model.User;
 import pl.ias.pas.hotelroom.pasrest.model.UserAdmin;
 
@@ -22,8 +23,10 @@ public class UserDao {
 
     @PostConstruct
     public void init() {
-        User user = new UserAdmin(UUID.randomUUID(), "admin", "admin1", "admin", "admin");
-        addUser(user);
+        User user1 = new UserAdmin(UUID.randomUUID(), "admin1", "admin1", "admin", "admin");
+        addUser(user1);
+        User user2 = new ResourceAdmin(UUID.randomUUID(), "admin2", "admin2", "admin2", "admin2");
+        addUser(user2);
     }
 
     @Warning("This method is for testing only !!!")

@@ -1,8 +1,9 @@
 package pl.ias.pas.hotelroom.pasrest.endpoints;
 
 import pl.ias.pas.hotelroom.pasrest.managers.ReservationManager;
+import pl.ias.pas.hotelroom.pasrest.managers.UserManager;
 import pl.ias.pas.hotelroom.pasrest.model.Reservation;
-import pl.ias.pas.hotelroom.pasrest.security.JwtUtils;
+import pl.ias.pas.hotelroom.pasrest.model.User;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -23,22 +24,14 @@ public class ReservationEndpoint {
     @Inject
     private ReservationManager reservationManager;
 
+    @Inject
+    private UserManager userManager;
+
     // przykładowe zapytanie tworzące nowej rezerwacji, trza niestety uzupelniac
     // http POST localhost:8080/PASrest-1.0-SNAPSHOT/api/reservation uid=  rid=
 
 
-    // CREATE [POST -> 201]
-    @POST
-    @Path("/{userId}/{roomId}")
-    @Consumes("application/json")
-    public Response createReservation(
-            @Valid Reservation reservation,
-            @PathParam("userId") String userId,
-            @PathParam("roomId") String roomId
-    ) {
-        if (reservation == null) {
-            reservation = new Reservation();
-        }
+    private Response createReservation(Reservation reservation, String userId, String roomId) {
         UUID userUUID = UUID.fromString(userId);
         UUID roomUUID = UUID.fromString(roomId);
         UUID createdReservation = reservationManager.addReservation(reservation, userUUID, roomUUID);
@@ -46,14 +39,37 @@ public class ReservationEndpoint {
         return Response.created(URI.create("/reservation/" + createdReservation)).build();
     }
 
-    //UPDATE\\
-//    @PostMapping(value = "/{id}", consumes = "application/json")
-//    public ResponseEntity updateReservation(@PathVariable("id") String reservationToUpdate, @RequestBody Reservation update) {
-//        UUID id = UUID.fromString(reservationToUpdate);
-//        reservationManager.updateReservation(id, update);
-//
-//        return ResponseEntity.ok().build();
-//    }
+    // CREATE [POST -> 201]
+    @POST
+    @Path("/create/for/{userId}/{roomId}")
+    @Consumes("application/json")
+    public Response createReservationFor(
+            @Valid Reservation reservation,
+            @PathParam("userId") String userId,
+            @PathParam("roomId") String roomId
+    ) {
+        if (reservation == null) {
+            reservation = new Reservation();
+        }
+        return createReservation(reservation, userId, roomId);
+    }
+
+    @POST
+    @Path("/create/logged/{roomId}")
+    @Consumes("application/json")
+    public Response createReservationLogged(
+            @Valid Reservation reservation,
+            @PathParam("roomId") String roomId,
+            @Context SecurityContext securityContext
+    ) {
+        if (reservation == null) {
+            reservation = new Reservation();
+        }
+        String login = securityContext.getUserPrincipal().getName();
+        User user = userManager.getUserByLogin(login);
+
+        return createReservation(reservation, user.getId().toString(), roomId);
+    }
 
     // DELETE [HEAD -> 200]
     @HEAD
@@ -66,7 +82,7 @@ public class ReservationEndpoint {
 
     // READ [GET -> 200]
     @GET
-    @Path("/{id}")
+    @Path("/get/id/{id}")
     @Produces("application/json")
     public Response getReservationById(@PathParam("id") String id) {
         Reservation reservation = reservationManager.getReservationById(UUID.fromString(id));
@@ -76,32 +92,40 @@ public class ReservationEndpoint {
 
     // READ ALL [GET -> 200]
     @GET
-    @Path("/all")
+    @Path("/get/all")
     @Produces("application/json")
-    public Response getAllReservation() {
+    public Response getAllReservations() {
         return Response.ok(reservationManager.getAllReservations()).build();
     }
 
     // SEARCH [GET -> 200]
     @GET
-    @Path("/search")
+    @Path("/search/admin")
     @Produces("application/json")
-    public Response getActiveReservationByClient(
+    public Response searchReservations(
             @QueryParam(value = "clientId") @DefaultValue("") String clientId,
             @QueryParam(value = "roomId") @DefaultValue("") String roomId,
-            @QueryParam(value = "archived") @DefaultValue("true") boolean archived,
-            @Context SecurityContext context,
-            @HeaderParam("Authorization") String token
+            @QueryParam(value = "archived") @DefaultValue("true") boolean archived
     ) {
-        if (context.isUserInRole("CLIENT")) {
-            String userId = JwtUtils.getUserId(token);
-            if (!clientId.equals(userId)) {
-                return Response.status(Response.Status.FORBIDDEN).build();
-            }
-        }
 
         List<Reservation> reservations = reservationManager
                 .searchReservations(clientId, roomId, archived);
+        return Response.ok(reservations).build();
+    }
+
+    @GET
+    @Path("/search/logged")
+    @Produces("application/json")
+    public Response searchReservationsLogged(
+            @QueryParam(value = "roomId") @DefaultValue("") String roomId,
+            @QueryParam(value = "archived") @DefaultValue("true") boolean archived,
+            @Context SecurityContext context
+    ) {
+        User user = userManager.getUserByLogin(context.getUserPrincipal().getName());
+        String userId = user.getId().toString();
+
+        List<Reservation> reservations = reservationManager
+                .searchReservations(userId, roomId, archived);
         return Response.ok(reservations).build();
     }
 }
