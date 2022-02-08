@@ -39,16 +39,16 @@
         <role-name>RESOURCE_ADMIN</role-name>
     </security-role>
 
-    <security-constraint>
-        <display-name>SecuredTransport</display-name>
-        <web-resource-collection>
-            <web-resource-name>SecuredTransport</web-resource-name>
-            <url-pattern>/*</url-pattern>
-        </web-resource-collection>
-        <user-data-constraint>
-            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
-        </user-data-constraint>
-    </security-constraint>
+<!--    <security-constraint>-->
+<!--        <display-name>SecuredTransport</display-name>-->
+<!--        <web-resource-collection>-->
+<!--            <web-resource-name>SecuredTransport</web-resource-name>-->
+<!--            <url-pattern>/*</url-pattern>-->
+<!--        </web-resource-collection>-->
+<!--        <user-data-constraint>-->
+<!--            <transport-guarantee>CONFIDENTIAL</transport-guarantee>-->
+<!--        </user-data-constraint>-->
+<!--    </security-constraint>-->
 
     <security-constraint>
         <web-resource-collection>
