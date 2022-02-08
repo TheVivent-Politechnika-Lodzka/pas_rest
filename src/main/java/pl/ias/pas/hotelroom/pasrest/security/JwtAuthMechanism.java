@@ -32,6 +32,9 @@ public class JwtAuthMechanism implements HttpAuthenticationMechanism {
         if (request.getRequestURL().toString().endsWith("login") || request.getRequestURL().toString().endsWith("test")) {
             return context.doNothing();
         }
+        if (request.getMethod().contains("OPTIONS")){
+            return context.doNothing();
+        }
 
         String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
         if (authorizationHeader == null || !authorizationHeader.startsWith(BEARER_PREFIX)) {

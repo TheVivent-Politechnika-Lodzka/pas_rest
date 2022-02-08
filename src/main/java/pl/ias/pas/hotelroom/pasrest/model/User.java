@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.ias.pas.hotelroom.pasrest.exceptions.ValidationException;
 
+import javax.json.bind.annotation.JsonbTransient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.UUID;
@@ -28,7 +29,7 @@ abstract public class User<T extends User<T>> {
     @Pattern(regexp = "^[a-zA-Z0-9]{3,20}$", message = "Login must be 3-20 characters long and contain only letters and numbers")
     private String login;
 
-    @JsonIgnore
+    @JsonbTransient
     public String getPassword() {
         return password;
     }
