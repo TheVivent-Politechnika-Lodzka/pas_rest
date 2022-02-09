@@ -1,7 +1,6 @@
 package pl.ias.pas.hotelroom.pasrest.model;
 
 
-import com.nimbusds.jose.shaded.json.annotate.JsonIgnore;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
